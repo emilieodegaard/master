@@ -1,4 +1,4 @@
-# Overview of files
+# Overview of folders
 
 ## doc
 Contains all tex-files.
