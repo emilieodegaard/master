@@ -1,0 +1,160 @@
+\chapter{Numerical discretization}
+\label{chap:discretization}
+There are several equations where the exact solution is either unknown or not explicitly available \cite{evans}. In such cases, a numerical approximation is sought. The finite element method is a numerical method to approximate solutions of partial differential equations. The general idea of this method is to divide the problem into a set of smaller and simpler problems, called elements, and find an approximated solution on each element for then to merge all the approximations to find the global solution. The first step is to define a weak form of the PDE followed by a discretization of the physical domain. Then, a finite discretized space of functions is constructed related to the discretization. Finally, the weak form is approximated in the finite element space using a Galerkin method where the problem is reduced to a system of algebraic equations. 
+\\
+\\
+This chapter derives the discretization of the mathematical models presented in chapter \ref{chap:math}. The methods are widely used and can be found in several introductory books on the finite element method, see, e.g. \cite{brenner, ern, gatica}. Section \ref{section:disc_mpet} presents the discretization of the MPET model, where the spatial discretization follows the temporal discretization. Section \ref{disc_poisson} derives the discretization for the Poisson model. In addition, a priori error estimates for both mathematical models are provided in section \ref{section:a_priori}.
+
+\section{Discretization of MPET} \label{section:disc_mpet}
+In this thesis, we will assume that the data is smooth enough for a strong solution to exist, which includes the boundary and initial conditions as well as the source terms. In addition, the problem is a so-called \textit{mixed problem}, as the unknown variables are the displacement $u$ and the pressure $p$. These need to be approximated in different finite element spaces, giving a mixed variational formulation. The multiple-network poroelasticity equations (MPET) consists of both temporal and spatial derivatives, so the following sections outline the discretization first in time and then in space. 
+
+\subsection{Temporal discretization of MPET}
+We use a Backward-Euler time discretization with $t\in (0,T]$ and assume $\tau_n = t^n - t^{n-1}$ for $0 \leq n \leq N$. The problem then becomes: given $u^{n-1}$ and $p_a^{n-1}$, find $u^n$ and $p_a^n$ at all steps $n = 0, ..., N$ for every network $a=1,..A$ such that,
+\begin{align} \label{temp_disc_mpet1}
+- \nabla \cdot \sigma^{\ast^n}(u^n) + \displaystyle\sum_a \alpha_a \nabla p_a^n = f^n \\
+c_a\left(\frac{p_a^n - p_a^{n-1}}{\tau_n} \right) + \alpha_a \nabla \cdot\left(\frac{u^n - u^{n-1}}{\tau_n}  \right) - \nabla \cdot K_a \nabla p_a^n + S_a(\vec{p}^n) = g_a^n \label{temp_disc_mpet2}
+\end{align}
+where,
+\begin{equation} \label{S_a}
+S_a(p_1^n, ..., p_A^n) = \displaystyle\sum_{b=1}^A \xi_{b \rightarrow a}(p^n_a - p^n_b)
+\end{equation}
+\\
+\\
+To accommodate the finite element formulation from a strict PDE-problem to several smaller problems, we need to take away some of the conditions on the unknown solutions, $u$ and $\vec{p} = (p_1,..,p_A)$. To do this, we introduce a weak formulation of the equation, which allows for the equation to not hold absolutely but instead hold in relation to a test function in a chosen function space. The idea is that if the test function is sufficiently smooth, the requirements made on the unknown solution may be reduced by doing integration by parts on the terms with higher-order derivatives. 
+\\
+\\
+In order to find the weak form of the temporal discretization, we introduce \textit{trial functions} $u\in V$, $p_a \in Q$ for each network $a=1,..A$ and their respective \textit{test functions} $v \in \hat{V}$, $q_a \in \hat{Q}$. The test functions are typically assumed to be independent of time. Furthermore, their respective trial and test spaces are defined as,
+\begin{align} 
+V:= &\{v \in H^1(\Omega; \R^d) \, | \, v = \bar{u} \,\, \text{on} \, \, \partial \Omega\}, \hspace{0.5cm} 
+\hat{V} :=  \{v \in V \, | \, v = 0 \,\, \text{on} \, \, \partial \Omega \} \\
+Q:= &\{q_a \in L^2(\Omega; \R^d) \, | \, q_a = \bar{q_a} \,\, \text{on} \, \, \partial \Omega\}, \, \,
+\hat{Q} := \{q_a \in Q \, | \, q_a = 0 \,\, \text{on} \, \, \partial \Omega\}
+\end{align}
+where $V,\hat{V} \subseteq L^2(\Omega)$ and $Q,\hat{Q} \subseteq H^1(\Omega)$ and $\bar{u}$ and $\bar{q_a}$ are some given functions. 
+\\
+\\ 
+Boundary conditions can be prescribed by considering two partitions of the boundary: one for the displacement field and the other for the pressure field. For the sake of simplicity, a Dirichlet condition is enforced on the displacement and the pressure everywhere for this thesis. The following boundary conditions will be used,
+\begin{align}
+u =  u_e \,\, & \, \text{on} \, \, \partial \Omega \, \, \, \forall t\in(0,T]\\
+p_a = p_{a_e} \,\, & \,\text{on} \, \, \partial \Omega \, \, \forall t\in(0,T]
+\end{align}
+\\
+Let $\langle\cdot, \cdot \rangle$ denote the $L^2$ inner product over $\Omega$. All test functions are required to vanish where the boundary is known, and the weak form of the problem thus becomes: find $u^n \in V$, $p_a^n \in Q_a$ for each network $a=1,..A$ such that, 
+\\
+\begin{align} \label{mpet_disc1}
+\langle \sigma^*(u^n), \nabla v \rangle - \displaystyle\sum_a \langle \alpha_a p_a^n ,\nabla \cdot v \rangle = &\, \langle f^n , v \rangle \\
+\langle c_a p_a^{n} + \alpha_a \nabla \cdot \,u^n + \tau_n S_a(p^n),  q_a \rangle + K_a \tau_n\langle \nabla p_a, \nabla q_a\rangle  = & \, \langle G_a^n, q_a\rangle \label{mpet_disc2}
+\end{align}
+for all $v \in \hat{V}$ and $q_a \in \hat{Q}$, where,
+\begin{align} \label{G_source}
+G_a^n = \tau_n g_a^n + c_a p_a^{n-1} + \alpha_a \nabla \cdot \, u^{n-1}
+\end{align}
+\\
+We note that as $\sigma^*(u)$ is a symmetric tensor, the inner product $\langle \sigma^*(u^n), \nabla  v^n \rangle$ will result in $\langle \sigma^*(u^n), \epsilon(v) \rangle$ as the asymmetric part of the product vanishes.
+\subsection{Spatial discretization of MPET}
+Given a mesh $\mathcal{T}_h$, we define discrete spaces $V_h$ and $Q_h$ which are assumed to be finite-dimensional subspaces of $V$ and $Q$, respectively. Here $h$ is defined as the size of the elements in the mesh $\mathcal{T}_h$. We use Taylor-Hood elements to approximate the displacement and pressure, i.e. continuous piecewise second order polynomials for the displacement and continuous piecewise linears for the pressure. Let $0 = t_0 < t_1 <...< t_N = T$ be a sequence of discrete time steps for all $n\in\{1,..., N \}$.  
+\\
+\\
+The weak form of the spatial discretization is then: given $u_h^{n-1}$ and $p_{a_h}^{n-1}$, find $u_h^n \in \hat{V}_h$ and $p_{a_h}^n \in \hat{Q}_h$ with $x\in \Omega \subset \R^n$ such that for all $n\in\{1,..., N \}$,
+\begin{align} \label{mpet_fem1}
+\langle C \epsilon(u_h^n), \epsilon(v_h) \rangle - \sum_a \langle \alpha_a p_{a_h}^n ,\nabla \cdot v_h \rangle = & \langle f_h^n , v_h \rangle  \\
+\langle c_a p_{a_h}^{n} + \alpha_a \nabla \cdot u_h^n + \tau_n S_a(\vec{p_h}^n),  q_{a_h} \rangle + K_a \tau_n \langle \nabla p_{a_h}, \nabla q_{a_h}\rangle = & \langle G_{a_h}^n, q_{a_h}\rangle  \label{mpet_fem2}
+\end{align}
+for all $v_h \in \hat{V_h}$ and $q_{a_h} \in \hat{Q_h}$, where $G_{a_h}^n$ is defined as,
+\begin{equation} \label{Gh_source}
+G_{a_h}^n = \tau_n g_{a_h}^n + c_a p_{a_h}^{n-1} + \alpha_a \nabla \cdot \, u_h^{n-1}
+\end{equation}
+\subsubsection{Bilinear form} \label{section:num_disc_bilinear}
+It is practical to work with the bilinear form of the discrete problem when deriving the a posteriori error estimates which will be outlined in chapter \ref{chap:error}. Hence, we need to establish a framework for this. 
+\\
+\\
+Let $V$ and $Q$ be two Hilbert spaces equipped with bilinear forms $a(\cdot, \cdot)$ and $b(\cdot, \cdot)$ respectively. Furthermore, we assume that the bilinear forms are symmetric, continuous and coercive. These forms will induce the norms $\|\cdot\|_a$, $\|\cdot\|_b$ respectively. Let $V'$ and $Q'$ be the respective dual space of $V$ and $Q$ with inner product $\langle \cdot, \cdot \rangle_a$ and norm $\| \cdot\|_{a'} = \sup{0 \neq v \in V} \|\langle \cdot, v \rangle_a\| / \|v\|_a$ (resp. for $Q'$).  
+\\ 
+\\
+The bilinear form of the discrete problem is then, for each network $a=1,...,A$, find $u_h^n \in \hat{V}_h$ and $p_{a_h}^n \in \hat{Q}_h$ such that for all $n\in\{0,..., N \}$,
+\begin{align} \label{bilinear}
+a(u_h^n, v_h) - \sum_a b_a(v_h, p_{a_h}^n) = & \, \langle f_h^n, v_h \rangle \\
+c_a(\partial_t p_{a_h}^n, q_{a_h}) + b_a( \partial_t u_h^n, q_{a_h}) + d_a(p_{a_h}^n, q_{a_h}) + \langle S_a(\vec{p_h}^n), q_{a_h}\rangle= & \, \langle g_{a_h}^n, q_{a_h} \rangle 
+\end{align}
+\\
+for all $v_h \in \hat{V}_h$ and all $q_{a_h} \in \hat{Q}_h$, where,
+\begin{align*}
+a(u_h^n, v_h) = \langle \sigma^*(u_h^n), \nabla \, v_h \rangle, \hspace{0.5cm}
+& b_a(v_h, p_h^n) =  \alpha_a \langle p_{a_h}^n ,\nabla \cdot \, v_h \rangle \\
+c_a(\partial_t p_h^n, q_h) = c_a \langle \partial_t p_{a_h}^{n},  q_{a_h} \rangle, \hspace{0.5cm} 
+& d_a(p_h^n, q_h) = K_a \langle \nabla \,p_{a_h}, \nabla\, q_{a_h}\rangle
+\end{align*}
+and $S_a(\vec{p_h}^n)$ is defined as in \eqref{S_a}. 
+\\
+\\
+Note that we did not integrate by parts the second term in \eqref{temp_disc_mpet2} in \eqref{bilinear}. The reason for this is that the second term in \eqref{temp_disc_mpet1} and the second term in \eqref{temp_disc_mpet2} are very similar in their structure which gives an advantage in the analysis; they are "adjoints" of each other. 
+\\
+\\
+It will also be practical to define the following bilinear map for the transfer terms summed over all networks $a$, i.e. $T : [L^2(\Omega)]^A \times [L^2(\Omega)]^A \to \mathbb{R}$,
+\begin{equation} \label{T_transfer}
+T(\vec{p},\vec{q}) = \frac{1}{2}\sum_{a,b=1}^A \xi_{b\rightarrow a} \langle p_{a} - p_{b}, q_a - q_b\rangle
+\end{equation}
+with the associated semi-norm, 
+\begin{equation}
+| \cdot |_T = \sqrt{T(\cdot, \cdot) }
+\end{equation}
+By the symmetry of the transfer coefficients $\xi_{b \to a}$, \eqref{T_transfer} can be written as, 
+\begin{equation} \label{T(p,q)}
+T(\vec{p},q) = \sum_{a=1}^A \langle S_a(p), q_a\rangle
+\end{equation}
+In light of this, we now define a norm on $[L^2(\Omega)]^A$, 
+\begin{equation} \label{d_hat_norm}
+\| \cdot\|_{\hat{d}} := \sum_{a=1}^A \|\cdot \|_d + \| \cdot \|_T
+\end{equation}
+Note that $\| \cdot\|_{\hat{d}} = \|\cdot \|_d$ when $A=1$. Also, note that each mass conservation equation in the MPET model contains pieces of the $\hat{d}$-norm and the full $\hat{d}$-norm is only obtained in the analysis when summing the full set of mass conservation equations together. That is, it will not be applied at a single network level. In addition, $\| \cdot\|_{\hat{d}}$ is symmetric since $T(\cdot,\cdot)$ and $d(\cdot,\cdot)$ are symmetric. It is important to point out that the $\hat{d}$-norm serves the purpose of making the analysis simple and easily extendable to the analysis done for the single network case, which will become clear in chapter \ref{chap:error}.
+\begin{remark}
+Please note that we use $c_a(\cdot, \cdot)$ to define a bilinear form and $c_a$ to be the storage coefficient for network $a$.
+\end{remark} 
+
+\section{Discretization of Poisson} \label{disc_poisson}
+The strong form of the Poisson model is given in \eqref{eq:poisson_strong_form}, which has the variational form: find $u \in V$ such that
+\begin{align} \label{poisson_disc}
+\langle \nabla u , \nabla v  \rangle = \langle f, v  \rangle \hspace{0.5cm} \forall v \in V
+\end{align}
+where,
+\begin{align}
+V = \{u \in H^1(\Omega) : u = 0 \,\,\, \textnormal{on} \,\,\, \Gamma_D \}
+\end{align}
+Note that $V$ is also known as $H^1_0(\Omega)$. 
+\\
+\\
+Let $V_h \subset V$ be a finite dimensional subspace of $V$. Then the corresponding discrete variational problem is: find $u_h \in V_h$ such that,
+\begin{equation} \label{eq:poisson_variational}
+\langle \nabla \, u_h, \nabla \, v_h \rangle = \langle f, v_h  \rangle \hspace{0.5cm} \forall v_h \in V_h
+\end{equation}
+
+\section{A priori error estimates} \label{section:a_priori}
+In this section, a priori error estimates for the MPET problem (A=1,2) and the Poisson problem will be derived. The a priori error estimates provide an estimate for the expected convergence rates of the norm of the error. This is necessary since computing the convergence rates will validate our results and ensure that we see what we should according to the mathematical theory. A more detailed explanation of convergence rate is presented in section \ref{section:convergence_rate}. The a priori error estimates for the Biot model has been analyzed in \cite{meunier} and an analysis of the a priori error estimates for the Barenblatt-Biot model can be found in \cite{boal}.
+\\
+\begin{definition}[\textbf{A priori error estimate (MPET, A=1)}]
+Let $u\in V$ and $p \in Q$ be the solution to \eqref{mpet_disc1}-\eqref{mpet_disc2} with A=1, and let $u_h \in V_h$ and $p_h \in Q_h$ be the solution to \eqref{mpet_fem1}-\eqref{mpet_fem2} with A=1, discretized with Taylor-Hood elements. Then, the following estimate holds,
+\begin{equation*}
+\|u - u_h \|_{H^1} + \|p - p_h \|_{L^2} \leq Ch^2\|u \|_3 + Dh^2\|p \|_2
+\end{equation*}
+for sufficiently smooth solutions. This follows from \eqref{def:approx} using $m=1$ and $t=3$ for $\|u - u_h \|_{H^1}$ and $m=0$ and $t=2$ for $\|p - p_h \|_{L^2}$. The estimate states that the $H^1$-error for the displacement and the $L^2$-error for the pressure is expected to be of at least second order. 
+\end{definition}
+
+\begin{definition}[\textbf{A priori estimate (MPET, A=2)}]
+Let $u\in V$ and $(p_1, p_2) \in( Q \times Q)$ be the solution to \eqref{mpet_disc1}-\eqref{mpet_disc2} with A=2, and let $u_h \in V_h$ and $(p_{1h}, p_{2h}) \in (Q_h \times Q_h)$ be the solution to \eqref{mpet_fem1}-\eqref{mpet_fem2} with A=2, discretized with Taylor-Hood elements. Then, the following estimate holds,
+\begin{equation*}
+\|u - u_h \|_{H^1} + \|p_1 - p_1h \|_{L^2} + \|p_2 - p_2h \|_{L^2} \leq Ch^2\|u \|_3 + Dh^2\|p_1 \|_2 + E h^2\|p_2 \|_2
+\end{equation*}
+for sufficiently smooth solutions. This follows from \eqref{def:approx} using $m=1$ and $t=3$ for $\|u - u_h \|_{H^1}$ and $m=0$ and $t=2$ for $\|p_1 - p_1h \|_{L^2}$ and $\|p_2 - p_2h \|_{L^2}$. The estimate states that the $H^1$-error for the displacement and the $L^2$-error for the pressures is expected to be of at least second order. 
+\end{definition}
+
+\begin{definition}[\textbf{A priori estimate (Poisson)}]
+Let $u\in V$ be the solution to \eqref{poisson_disc} and let $u_h \in V_h$ be the solution to \eqref{eq:poisson_variational}. Then, the following estimates holds,
+\begin{equation*}
+\|u - u_h\|_{H^1} \leq Ch^2\|u \|_3
+\end{equation*} 
+\begin{equation*}
+\|u - u_h\|_{L^2} \leq Ch\|u \|_2
+\end{equation*}
+for sufficiently smooth solutions. This follows from \eqref{def:approx} with $m=1$ and $t=2$ for $\|u - u_h\|_{H^1}$ and $m=0$ and $t=1$ for $\|u - u_h\|_{L^2}$. The estimate states that the $H^1$-error for $u$ is expected to be of at least third order, wile the $L^2$-error for $u$ is expected to be of at least second order.
+\end{definition}
+

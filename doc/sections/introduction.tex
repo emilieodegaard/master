@@ -1,0 +1,235 @@
+\chapter{Introduction}
+\label{chap:intro}
+
+Poroelasticity is known to have numerous applications in biomedical engineering as well as soil mechanics and reservoir engineering \cite{coussy}. Within medical research poroelasticity can be used to simulate fluid transport through the brain \cite{tully}. The multiple network poroelasticity equations (MPET) has been introduced into geomechanics to describe mechanical deformation and fluid flow in porous media as a generalization of Biot’s theory \cite{biot, biot2}. In recent times, the MPET model has been used to better understand the influence of biomechanical risk factors associated with early stages of Alzheimer's disease \cite{guo}. The transportation of fluids and waste clearance through the brain is still not universally understood by scientists, and many questions remain unanswered \cite{iliff}. 
+\\
+\\
+Modeling transportation of fluid in the brain is essential to discover the underlying mechanisms that are currently being investigated concerning various neurodegenerative diseases such as Alzheimer's disease \cite{bacyinski}. The current research that is being done to understand these processes is considered complex and in some cases impossible to execute, which calls for alternative methods. Mathematical simulations are often easier to perform and more cost-effective than using traditional methods such as medical experiments and advanced image processing. Complicated natural processes can be better understood through mathematical modeling, which can potentially improve treatments and the diagnosis of diseases. However, numerical simulations can be time-consuming as well as error-prone, especially when the mathematical model and the framework surrounding it is complex. Complexity is nearly unavoidable when working in a physiological framework, hence some precautions are necessary to ensure an accurate and efficient mathematical model. 
+\\
+\\
+The presence of numerical error in mathematical approximations has been an issue ever since the technique was first introduced. Mathematical modeling relies on assumptions and simplifications about the physical world, and will inherently produce some error merely from its construction. Thus, it is important to measure this error to potentially control and minimize it. While it may in some cases be sufficient to estimate the overall accuracy of the numerical method qualitatively, it will in most cases be even more valuable to estimate the accuracy in specific regions of the computational domain. The former describes \textit{a priori} error estimators, and the latter \textit{a posteriori} error estimators, which are the two main types of error estimation techniques available \cite{verfurth96, ainsworth}. A priori error estimators give information on the overall asymptotic behavior of the error from the discretization method, while a posteriori error estimators give information on the asymptotic behavior of the error localized on each element \cite{verfurth92}. The idea is that instead of trying to minimize the total error, which is computationally expensive, an a posteriori error estimator may identify the regions where minimization is necessary. 
+\\
+\\
+In this thesis, an in-depth derivation of the a posteriori error estimators for MPET with one and two networks is presented. A posteriori error analysis for MPET with one network has been covered in \cite{meunier, riedlbeck} and an a priori error analysis can be found in \cite{murad1, murad2, murad3}. To the best of our knowledge, an a posteriori error estimate has not yet been derived for MPET with two or more networks, with the exception of the static coupled two-network case presented by Nordbotten et al. \cite{nordbotten}. This thesis will build upon the constructed a posteriori error estimates for MPET with one network, and extend the analysis to a second network in the quasi-static formulation. The theoretical results will be evaluated using numerical experiments. 
+%In addition, the a posteriori error estimators will be evaluated in a numerical implementation to determine how robust they are with varying model parameters. %MPET is computationally challenging since the physical parameters for different applications exhibit considerable variations. 
+\\
+\\
+This thesis is organized as follows, chapter \ref{chap:math} introduces the relevant mathematical models, and chapter \ref{chap:discretization} presents the numerical methods used to solve the mathematical problems. Chapter \ref{chap:error} outlines the a posteriori error estimation techniques using a simple model problem and derives the a posteriori error estimators for MPET with one and two networks. Chapter \ref{chap:experiments} contains a presentation of the numerical experiments along with the numerical results. In chapter \ref{chap:discussion}, the results are summarized and discussed, and provides conclusions and directions for future work.
+\\
+\\
+The numerical experiments was done using FEniCS \cite{fenics} (version 2018.1.0) in Docker \cite{docker} (version 18.03.1). The code can be found here: \url{https://github.com/emilieodegaard/master}
+
+\newpage
+\section{Notation}
+The following notation will be used throughout this thesis.
+\\
+\\
+\begin{tabular}{lll}
+                  & \textbf{General symbols} & \\[3pt]
+    $\Omega $   & The domain of interest, an open subset of $\R^n$ &\\ [3pt]
+    $\partial\Omega$   & Exterior boundary of $\Omega$ &\\[3pt]
+    $u$  & Displacement &\\[3pt]
+    $p$  & Pressure &\\[3pt]
+    $\nabla \cdot $  & Divergence  & \\[3pt]
+    $\nabla $ & Gradient  & \\[3pt]
+    $\Delta$  & Laplace operator &\\[3pt]
+                 & \textbf{Model parameters} & \\[3pt]
+    $\alpha$  & Biot-Willis coefficient &  \\[3pt]
+    $\mu$      & Lamé parameter & Pa $\cdot$ s  \\[3pt]
+    $\lambda$  & Lamé parameter & m$^2$ s$^{-1}$  \\[3pt]
+    $Q^{-1}$    & Compressibility  & Pa \\[3pt]
+    $c$    & := $Q^{-1}$, Storage coefficient & Pa$^{-1}$\\[3pt]
+ 	$\kappa$   & Permeability parameter  & m$^{2}$\\[3pt]
+    $K$   & := $\kappa / \mu$ Mobility parameter  & m$^{2}$ Pa$^{-1}$ s$^{-1}$\\[3pt]
+    $\xi$     & Transfer parameter  & Pa$^{-1}$ s$^{-1}$\\[3pt]
+                  & \textbf{Function spaces} & \\[3pt]
+    $\R$ & Real numbers &  \\[3pt]
+    $\N$ & Natural numbers & \\[3pt]
+    $C^0(\Omega)$  & Set of continuous functions & \\[3pt]
+    $C^{\infty}(\Omega)$  & Set of smooth functions & \\[3pt]
+    $C^k(\Omega)$  & Set of functions with continuous derivatives up to order $k$ & \\[3pt]
+    $C^k_0(\Omega)$  & Subset of $C_k$ of functions with compact support &\\[3pt]
+    $L^2(\Omega)$ & Space of square-integrable functions &\\[3pt]
+    $L^2_0(\Omega)$  & Subset of $L^2$ of functions with compact support &\\[3pt]
+    $H^m(\Omega)$ & Sobolev space of $L^2$ functions with square-integrable \\
+    $H^m_0(\Omega)$  & Subset of $H^m$ of functions with compact support &\\[3pt]
+    &  derivatives up to order m &\\[3pt]
+    $H^{-1}(\Omega)$  & Dual space of $H^1(\Omega)$ &\\[3pt]
+    & \textbf{The finite element method} & \\[3pt]
+    $\langle \cdot, \cdot \rangle$  & $L^2$-inner product over $\Omega$ &\\[3pt]
+    $\partial \Omega_D$  & Part of the boundary $\partial \Omega $
+                                         with Dirichlet boundary conditions  &\\[3pt]
+    $\mathcal{P}_q(T)$ &  Space of polynomials of total
+                       degree $\leq q$ over T &\\[3pt]
+    $P_q$   & Lagrange element of degree $q$ &\\[3pt]
+\end{tabular}
+\newpage
+\begin{tabular}{lll}
+    & \textbf{Finite element partition} & \\[3pt]
+    $\mathcal{T}_h$   & Partition of $\Omega$ &\\[3pt]
+    $h$   & Maximum diameter of the elements in $\mathcal{T}_h$ &\\[3pt]
+    $T$   & Element in $\mathcal{T}_h$ &\\[3pt]
+    $E$   & Face or edge of $T$ in $\mathcal{T}_h$ &\\[3pt]
+    $\mathcal{E}_T$   & Faces of $T$ &\\[3pt]
+    $\mathcal{E}_\Omega$   & Faces having at least one endpoint in the interior of $\Omega$ &\\[3pt]
+    $\mathcal{E}_{\partial\Omega}$   & Faces contained in the boundary &\\[3pt]
+     $\mathcal{E}_{\partial\Omega_D}$   & Faces contained in the Dirichlet boundary &\\[3pt]
+    $\omega_T$   & Elements sharing a face with $T$ &\\[3pt]
+    $\tilde{\omega}_T$  & Elements sharing a vertex with $T$ &\\[3pt]
+    $\omega_E$   & Elements sharing adjacent to $E$ &\\[3pt]
+    $\tilde{\omega}_E$  & Elements sharing a vertex with $E$ &\\[3pt]
+	$\psi_T$  & Element bubble function &\\[3pt]
+	$\psi_E$  & Face bubble function &\\[3pt]
+    $C_{\mathcal{T}}$   & Shape parameter of $\mathcal{T}_h$ &\\[3pt]
+ \end{tabular}
+
+\section{Mathematical preliminaries}
+\label{section:prelim}
+This section presents the mathematical theory and results necessary for the derivation of the a posteriori error estimates. All theory is compiled from \cite{verfurth13} with the exception of \ref{def:trace} which is from \cite{riviere}.
+
+\begin{definition}[\textbf{$L^P$-space}]\label{def:LP_space}
+Let $\Omega$ be an open subset of $\mathbb{R}^n$. For $1\leq p \leq \infty$, $L^p(\Omega)$ is defined as
+\begin{equation}
+L^p(\Omega) = \{u \in \Omega : (\int_\Omega |u|^p dx)^\frac{1}{p} < \infty\}
+\end{equation}
+with the corresponding norm $\|u\|_{L^p(\Omega)} = (\smallint_\Omega |u|^p dx)^\frac{1}{p}$
+\end{definition}
+
+\begin{definition}[\textbf{Weak derivative}]\label{def:weak_derivative}
+Let $\Omega$ be an open subset of $\mathbb{R}^n$. Assume $u,v \in L^1_{loc}(\Omega)$ and let $\alpha=(\alpha_1, ..., \alpha_n)$ denote a multi-index. Then $v$ is referred to as the $\alpha^{th}$ weak derivative of $u$ if
+\begin{equation}
+\int_\Omega u D^\alpha \phi dx = (-1)^{|\alpha|}\int_\Omega v \phi dx
+\end{equation}
+for all $\phi \in C_0^\infty(\Omega)$, where $D^\alpha \phi$ is defined as, 
+\begin{equation}
+D^\alpha \phi = \frac{\partial^{|\alpha|}\phi}{\partial^{\alpha_1}x_1 \cdots \partial^{\alpha_n}x_n} 
+\end{equation}
+\end{definition}
+\begin{remark}
+$L^1_{loc}(\Omega)$ denotes all locally integrable functions for the open set $\Omega$.
+\end{remark}
+
+\begin{definition}[\textbf{Sobolev space}]\label{def:sobolev}
+Let $\Omega$ be an open subset of $\mathbb{R}^n$. For a nonnegative integer $m$ where $\alpha=(\alpha_1, ..., \alpha_n)$ denotes a multi-index, the Sobolev space $H^m(\Omega)$ is defined as
+\begin{equation}
+H^m(\Omega) = \{u \in \Omega : (\sum_{|\alpha|\leq m} \int_\Omega |D^\alpha u|^2 dx)^\frac{1}{2} < \infty \}
+\end{equation}
+with the corresponding norm $\|u\|_{H^m(\Omega)}=(\sum_{|\alpha|\leq m} \int_\Omega |D^\alpha u|^2 dx)^\frac{1}{2}$
+\end{definition}
+
+\begin{definition}[\textbf{$H^1$-norm and semi-norm}]\label{def:semi_norm}
+The space $H^1(\Omega)$ is defined by the norm, 
+\begin{equation}
+\|u\|_{H^1(\Omega)} = (\int_\Omega u^2 + (\nabla u)^2 dx)^\frac{1}{2}
+\end{equation}
+and the semi-norm,
+\begin{equation}
+|u|_{H^1(\Omega)} = (\int_\Omega (\nabla u)^2 dx)^\frac{1}{2}
+\end{equation}
+The semi-norm is defined on the subspace $H_0^1(\Omega)$.
+\end{definition}
+
+\begin{theorem}[\textbf{Galerkin orthogonality}]\label{def:galerkin}
+For a given bilinear from $a(\cdot, \cdot)$ the following Galerkin orthogonality holds
+\begin{align}
+a(u-u_h, v_h) = 0 \hspace{0.5cm} \forall v_h \in V_h
+\end{align}
+where $V_h$ is the discrete subspace of $V$.
+\end{theorem}
+
+\begin{theorem}[\textbf{Support}]\label{def:support}
+Given a continuous function $u : \mathbb{R}^d \rightarrow \mathbb{R}$, the support is denoted by 
+\begin{align*}
+\textnormal{supp} \, u = \overline{\{x \in \mathbb{R}^d : \phi(x) \neq 0\}}
+\end{align*}
+\end{theorem}
+\begin{remark} All functions satisfying the condition "supp $\phi \subset \Omega$" vanish on the boundary of $\Omega$ as well as all their derivatives. This is because the condition is non-trivial as supp $\phi$ is closed and $\Omega$ is open. 
+\end{remark}
+
+\begin{theorem}[\textbf{Poincaré inequality}]\label{def:poincare}
+For all $u \in H^1(\Omega)$ with $\int_\Omega u = 0$, 
+\begin{equation}
+\|u \|_{H^0} \leq c_\Omega |u|_{H^1}
+\end{equation}
+where $c_\Omega$ depends on the domain $\Omega$. 
+\end{theorem}
+
+\begin{theorem}[\textbf{Friedrich inequality}] \label{def:friedrich}
+For all $u \in H^1_D(\Omega)$, 
+\begin{equation}
+\|u \|_{H^0} \leq c'_\Omega |u|_{H^1}
+\end{equation}
+where $c'_\Omega$ depends on the domain $\Omega$. 
+\end{theorem}
+
+\begin{theorem} [\textbf{Young's inequality}]\label{def:young}
+For nonnegative real numbers $a$ and $b$, where $p$ and $q$ are positive real numbers such that $\frac{1}{p} + \frac{1}{q} = 1$, then
+\begin{equation}
+ab \leq \frac{a^p}{p} + \frac{b^q }{q}
+\end{equation}
+\end{theorem}
+
+\begin{theorem} [\textbf{Approximation by interpolation}]\label{def:approx}
+There exists an interpolation operator $\pi_h : H^t(\Omega) \rightarrow V_h$, where $V_h$ is a piecewise polynomial field of order $t-1$ with the property that for any $u \in H^t(\Omega)$
+\begin{equation}
+\|u - \pi_h u \|_{H^m} \leq C h^{t-m}\| u\|_{H^t}
+\end{equation}
+\end{theorem}
+
+\begin{theorem} [\textbf{Quasi-interpolation operator}]\label{def:interpol}
+There exists a quasi-interpolation operator $I_h : L^1(\Omega) \rightarrow V_h$ with the property that for any $u \in H^1_D(\Omega)$ for all elements $T\in \mathcal{T}$,
+\begin{align*}
+& \, \|u - I_h u \|_{L^2(T)} \leq c_1 h_T \|u\|_{H^1(\tilde{\omega}_T)},\\
+& \, \|u - I_h u \|_{L^2(\partial T)} \leq c_2 h_T^{\frac{1}{2}} \|u\|_{H^1(\tilde{\omega}_T)}
+\end{align*}
+where $\tilde{\omega}_T$ denotes the set of all elements that share at least a vertex with $T$. 
+\end{theorem}
+\begin{remark}
+The quasi-operator does not interpolate a given function at the vertices. 
+\end{remark}
+
+\begin{definition}[\textbf{Element bubble function}] \label{def:bubble_est}
+For every element $T \in \mathcal{T}$ the \textit{element bubble function} $\psi_T$ has the following properties,
+\begin{align*}
+\psi_T(x) \in  [0,1] \quad & \,\forall x \in T \\
+\psi_T(x) =  0 \quad & \, \forall x \notin T \\
+\max_{x \in T} \psi_T(x) = 1 
+\end{align*}
+The following inverse estimates holds for all polynomials $\phi \subset \mathbb{P}^k$,
+\begin{align*}
+c_{I1,k}\|\phi \|_T \leq & \, \|\psi_T^{\frac{1}{2}}\phi\|_T \\
+\|\nabla(\psi_T\phi) \|_T \leq & \, c_{I2,k}H_T^{-1}\|\phi\|_T
+\end{align*}
+\end{definition}
+
+\begin{definition}[\textbf{Face/edge bubble function}] \label{def:bubble_est_edge}
+For every face $E \in \mathcal{E}$ the \textit{face bubble function } $\psi_E$ fulfills,
+\begin{align*}
+\psi_E(x) \in [0,1] \quad & \, \forall x \in \omega_E \\
+\psi_E(x) = 0 \quad  & \, \forall x \notin \omega_E \\
+\max_{x \in \omega_E} \psi_E(x) = 1 
+\end{align*}
+The inverse estimates holds for all polynomials $\phi \subset \mathbb{P}^k$,
+\begin{align*}
+c_{I3,k}\|\phi \|_E \leq & \, \|\psi_E^{\frac{1}{2}}\phi\|_E \\
+\|\nabla(\psi_E\phi) \|_{\omega_E} \leq & \, c_{I4,k}H_E^{-\frac{1}{2}}\|\phi\|_E \\
+\|\psi_E\phi \|_{\omega_E} \leq & \, c_{I5,k}H_E^{\frac{1}{2}}\|\phi\|_E 
+\end{align*}
+where $\omega_E$ is the union of all elements that share $E$.
+\end{definition}
+
+\begin{definition}[\textbf{Jump function}] \label{def:jump}
+For each edge $E \in \mathcal{E}$, the jump across $E$ in the direction $\mathbf{n}_E$ is defined as,
+\begin{equation}
+\mathbb{J}_E(\mathbf{n}_E \cdot u) = \llbracket \mathbf{n}_E\cdot u \rrbracket =  \mathbf{n}^+ \cdot u ^+ - \mathbf{n}^- \cdot u ^-
+\end{equation}
+\end{definition}
+
+\begin{theorem}[\textbf{Trace inequalities}]\label{def:trace}
+For every element $T$ with face or edge $E$ and all $u \in \mathbb{P}^k$ the following holds,
+\begin{align*}
+\|u\|_{L^2(E)} \leq c_{T1} h_T^{-\frac{1}{2}}\|u\|_{L^2(T)} \quad \forall u \in E \subset \partial T \\
+\|\nabla u \cdot \mathbf{n}\|_{L^2(E)} \leq c_{T2} h_T^{-\frac{1}{2}}\|\nabla u\|_{L^2(T)} \quad \forall u \in E \subset \partial T
+\end{align*}
+where $c_{T1}$ and $c_{T2}$ are constants depending on the size of the shape parameter. 
+\end{theorem}

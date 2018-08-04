@@ -1,0 +1,1272 @@
+\chapter{A posteriori error estimation}
+\label{chap:error}
+This chapter presents the main concepts and theory used in constructing the a posteriori error estimates for the mathematical models introduced in chapter \ref{chap:math}. A discussion on a posteriori error estimates for linear, elliptic and parabolic problems can be found in \cite{ainsworth, verfurth92, bangerth, babuska78b}. To demonstrate the fundamental theory of a posteriori error estimation, we first start with a simple model problem: the Poisson model, and then expand upon that to derive the a posteriori error estimates for MPET.
+\\
+\\
+The primary purpose of a posteriori error estimation is to gain information about the size of the error in the spatial and temporal distribution of the problem domain. This allows us to identify the regions where the error is high and where the error is low. On the grid-points where the error is high, we wish to perform refinement to obtain higher accuracy. On the grid-points where the error is low, we wish to either keep them that way or try with a higher mesh resolution to ensure a minimal number of grid-points. The idea is that instead of trying to minimize the total error with a priori error estimation, which is computationally expensive, an a posteriori error estimator identifies the regions where minimization is necessary.
+\\
+\\
+The general form of an error estimator usually looks like, 
+\begin{equation} \label{error_est}
+\|u - u_h \| \leq C(h)
+\end{equation}
+where $u$ is the exact solution, $u_h$ the numerical approximated solution, $h$ is a discretization parameter and $C(h)$ is some function of $h$. For the finite element method, $u$ is the solution of the PDE, $u_h$ is the finite element solution for a mesh with element size $h$. The estimate aims to minimize the error by decreasing the size of $h$. 
+We are, in other words, interested in constructing the right-hand side of \eqref{error_est}, which will be the goal for the following sections. 
+\\
+\\
+For the error estimator to be effective and perform optimally, it needs to fulfill a set of requirements \cite{verfurth92}. First, the error estimate should be accurate in the sense that the predicted error is close to the actual, unknown error. Second, the error estimated needs to be asymptotically correct. This means that they should tend to zero at the same rate as the actual error with a smaller discretization parameter. Ideally, the error estimator should yield guaranteed upper and lower bounds of the true error. The estimator should also be computationally simple, where the error estimate is inexpensive to compute when measuring the total computation time of the numerical solving. Lastly, the implementation should allow for an adaptive refinement process. 
+\\
+\\
+Refinement can in many ways be viewed as the main goal of a posteriori error estimation procedures. To carry out refinement, we need the following:
+\begin{enumerate}[noitemsep]
+\item A discretization method.
+\item A solver for the discrete problems.
+\item An error estimator which furnishes the a posteriori error estimate. 
+\item A refinement strategy.
+\end{enumerate}
+The first two points were covered in chapter \ref{chap:discretization}. The current chapter will focus on the third point: constructing the a posteriori error estimates for our model. Note that this thesis will not focus on point four, the refinement strategy. We will instead direct the reader to e.g. \cite{mitchell, eriksson} and chapter 2 in \cite{verfurth13}. 
+\\
+\\
+There are different types of a posteriori error estimators, including residual estimates, hierarchical basis error estimates, H(div)-lifting, averaging methods and auxiliary problem solutions \cite{verfurth13}. This thesis will focus on the first type of error estimator: \textit{residual estimates}. The basic idea of residual error estimates is to decompose the global residual into a number of local problems on small element partitions \cite{babuska78a}. To construct the residual estimate, we first find the $L^2$-representation of the residual and separate it into element and edge residuals. Next, we find upper and lower bounds on the residuals and end with showing that the norm of the error can be bounded from above and below by the residuals. This will be the procedure for our derivation of the a posteriori error estimates for the mathematical models presented in chapter \ref{chap:math}. 
+\\
+\\
+This chapter will first derive residual-based a posteriori error estimates for the Poisson model and the MPET model with one network, which are estimators that have already been derived in \cite{verfurth96} and \cite{meunier}, respectively. Using the techniques from these derivations, we then present the a posteriori error estimator for the MPET model with two networks. This chapter is organized as follows, section \ref{section:error_poisson} outlines the fundamental theory in deriving a posteriori error estimates with the Poisson model as an example. Section \ref{section:error_mpet} derives the a posteriori error estimators for the MPET model with one network, and then extending that analysis to two networks. 
+
+\section{Poisson model} \label{section:error_poisson}
+To illustrate some of the necessary conditions needed for an efficient error estimator we start with a simple example: the Poisson equation with homogeneous Dirichlet boundary conditions as presented in \eqref{eq:poisson_strong_form}.  
+\\
+\\
+The derivation of the residual estimators will occur in the following way: we first split the residual into elements and edges. We then insert the element residuals into the strong form of the differential equation. The edge residuals are derived via integration by parts on each element and consists of the jumps between each element of the trace operator. The edge residuals connect the strong and weak form of the differential equation. The residual estimates yield upper and lower bound for the error of the numerical discrete solution up to multiplicative constants. The upper bounds are global on the computational domain, whereas the lower bounds are local on each element and its neighbors. The following analysis is based on a posteriori error estimation methods inspired by \cite{verfurth13, neittaanmaki, repin}.
+\\
+\\
+We let $\langle .,.\rangle$ denote the $L^2$ inner product on $\Omega$ where $\Omega$ is a connected, bounded domain in $\R^2$ with boundary $\partial \Omega$. We assume $f$ to be a square-integrable function on $\Omega$. Using the variational form of the Poisson equation \eqref{eq:poisson_variational} from chapter \ref{chap:discretization}, we know that every $v \in V$ satisfies,
+\begin{equation} \label{eq:poisson_disc}
+\langle \nabla u, \nabla v \rangle = \langle f,v \rangle 
+\end{equation}
+Observe that by adding and substracting $u_h$ inside $\nabla u$ in \eqref{eq:poisson_disc} we have,
+\begin{equation} \label{eq:poisson_residuala}
+\langle \nabla (u-u_h), \nabla v \rangle =  \langle f,v \rangle - \langle \nabla u_h, \nabla v \rangle
+\end{equation}
+For every $v \in V$ we define the residual, 
+\begin{equation} \label{eq:poisson_residual}
+\langle R(u_h), v \rangle :=  \langle f,v \rangle - \langle \nabla u_h, \nabla v \rangle
+\end{equation}
+Then \eqref{eq:poisson_residuala} implies that, 
+\begin{equation} \label{eq:poisson_residualb}
+\langle R(u_h), v \rangle =  \langle \nabla (u-u_h), \nabla v \rangle
+\end{equation}
+Observe that we may bound the norm of the error using the definition of the semi-norm in $H^1$,
+\begin{align}
+\|\nabla(u-u_h) \|_{H^0(\Omega)} = |u-u_h|_{H^1(\Omega)} \leq \|u-u_h\|_{H^1(\Omega)}
+\end{align}
+Using Friedrich \eqref{def:friedrich} and Cauchy-Schwarz inequality on \eqref{eq:poisson_residualb} we then have,
+\begin{equation} \label{eq:poisson_sup}
+\sup_{\substack{v\in V \\ \| \nabla v\|=1}} \langle R, v \rangle \leq \| \nabla (u-u_h) \|_{L^2(\Omega)}  \leq \| u-u_h \|_{H^1(\Omega)} \leq \sqrt{1+c^2_\Omega} \sup_{\substack{v\in V \\ \| \nabla v\|=1}}\langle R, v \rangle
+\end{equation}
+We may thus conclude that the norm of the error $\| u-u_h \|_{H^1(\Omega)}$ may be bounded up to a multiplicative constant, from above and below by the norm of the residual. Our next step is therefore to find these upper and lower bounds on the error. To do this, we start by separating the residuals elementwise and edgewise to localize the error on each element.
+
+\subsection{Element and edge residuals}
+We let $T$ denote the element and $E$ the edge/face of a mesh $\mathcal{T}$. Using integration by parts on the formulation for the residual \eqref{eq:poisson_residuala}, we have for every $v \in V$,
+\begin{align} \label{poisson_el_edge}
+\int_\Omega \nabla(u-u_h) \nabla v = & \, \int_\Omega fv - \int_\Omega \nabla u_h \nabla v \\ 
+= & \,  \displaystyle\int_\Omega fv + \displaystyle\sum_{T \in \mathcal{T} } \left( \displaystyle\int_T \Delta u_h v - \displaystyle\int_{\partial T} \mathbf{n}_T \cdot \nabla u_h v\right) \notag\\ 
+= & \, \displaystyle\sum_{T \in \mathcal{T}} \displaystyle\int_T (f + \Delta u_h) \,v - \displaystyle\sum_{E \in \mathcal{E}} \displaystyle\int_E \mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h) \, v  \notag
+\end{align}
+Recall that $\langle \nabla(u-u_h), \nabla v \rangle = \langle R(u_h), v \rangle$ of \eqref{eq:poisson_residualb}. Inserting this into the left-hand side of \eqref{poisson_el_edge}, we have the following representation of the residual,
+\begin{equation} \label{eq:res_L2}
+\int_\Omega R(u_h) v = \, \, \displaystyle\sum_{T \in \mathcal{T}} \displaystyle\int_T R_T(u_h)\, v  + \displaystyle\sum_{E \in  \mathcal{E}} \displaystyle\int_E R_E(u_h) \, v
+\end{equation}
+where we define the \textit{element residual}, 
+\begin{equation} \label{eq:element_res}
+R_T(u_h) = f + \Delta u_h \quad T \in \mathcal{T} 
+\end{equation}
+and the \textit{edge residuals} as,
+\begin{equation} \label{eq:edge_res}
+R_E(u_h) = \begin{cases} 
+	- \mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h) & \quad  E \in \mathcal{E}_\Omega \\
+     0 & \quad E \in \mathcal{E}_{\Gamma_D} \\
+\end{cases}
+\end{equation}
+Note that we have used that the exterior unit normal in the negative direction is defined as $\mathbf{n}^- = -\mathbf{n}$. This yields, 
+\begin{align}
+\displaystyle\sum_{T \in \mathcal{T}} \displaystyle\int_{\partial T}\mathbf{n}_T \cdot \nabla u_h v = & \, \displaystyle\sum_{E \in \mathcal{E}} \displaystyle\int_E \mathbf{n}^+ \nabla u_h^+ v + \displaystyle\int_E \mathbf{n}^- \nabla u_h^- v \\
+= & \, \displaystyle\sum_{E \in \mathcal{E}} \displaystyle\int_E \mathbf{n} \nabla u_h^+ v + \displaystyle\int_E (-\mathbf{n}) \nabla u_h^- v\notag\\
+= & \, \displaystyle\sum_{E \in \mathcal{E}} \displaystyle\int_E \left(\nabla u_h^+ - \nabla u_h^- \right)\cdot \mathbf{n} \, v \notag\\
+= & \, \displaystyle\sum_{E \in \mathcal{E}} \displaystyle\int_E \mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h) \, v \notag
+\end{align} 
+The last equality is deduced from the definition of the jump function \ref{def:jump}. 
+\\
+\subsection{Upper bound} \label{poisson_up_bd_section}
+We start by fixing $w\in V$ and let $w_h = I_h w$ where $I_h$ is the quasi-interpolation operator \eqref{def:interpol} from section \ref{section:prelim}. Recall that due to the Galerkin orthogonality we have equality when using the test functions $w$ and $w-w_h$. We thus have,
+\\
+\begin{align} \label{poisson:up_bd1}
+\int_\Omega \nabla(u-u_h) \nabla v = & \, \displaystyle\sum_{T \in \mathcal{T}} \displaystyle\int_T R_T(u_h)\, w  + \displaystyle\sum_{E \in \mathcal{E}} \displaystyle\int_E R_E(u_h) \, w  \\ 
+= & \, \displaystyle\sum_{T \in \mathcal{T}} \displaystyle\int_T R_T(u_h)\, (w-w_h)  + \displaystyle\sum_{E \in \mathcal{E}} \displaystyle\int_E R_E(u_h) \, (w-w_h) \notag
+\end{align}
+\\
+Inserting the test function $w_h$ into \eqref{poisson:up_bd1} and using the Cauchy-Schwartz inequality yields, 
+\begin{align} \label{poisson:up_bd4a}
+\langle \nabla(u-u_h), \nabla w \rangle \leq  & \displaystyle\sum_{T \in \mathcal{T}} \| R_T(u_h)\|_T \|(w-I_h w)\|_T  \\ 
+& + \displaystyle\sum_{E \in \mathcal{E}} \| R_E(u_h) \|_E \|(w-I_h w)\|_E \notag
+\end{align}
+\\
+We use the quasi-interpolation operator \ref{def:interpol} on \eqref{poisson:up_bd4a} to get, 
+\begin{align} \label{poisson:up_bd5a}
+\langle \nabla(u-u_h), \nabla w \rangle \leq & \, \displaystyle\sum_{T \in \mathcal{T}} \| R_T(u_h)\|_T c_1 h_T \|w\|_{H^1(\tilde{\omega}_T)} \\
++ & \, \displaystyle\sum_{E \in \mathcal{E}} \| R_E(u_h) \|_E c_2 h_E^{\frac{1}{2}} \|w\|_{H^1(\tilde{\omega}_E)} \notag
+\end{align}
+Finally, using the Cauchy-Schwarz inequality for sums on \eqref{poisson:up_bd5a} we get,
+\begin{align} \label{poisson:up_bd6a}
+\langle \nabla(u-u_h), \nabla w \rangle \leq  \max\{c_1, c_2\}\bigl\{& \, \sum_{T \in \mathcal{T}} h_T^2\| R_T(u_h)\|^2_T \\
+& \quad + \sum_{E \in \mathcal{E}} h_E\| R_E(u_h) \|^2_E \bigr\}^\frac{1}{2}  \notag \\
+& \, \cdot \bigl\{\sum_{T \in \mathcal{T}} \|w\|^2_{H^1(\tilde{\omega}_T)} + \sum_{E \in \mathcal{E}}\|w\|^2_{H^1(\tilde{\omega}_E)}\bigr\}^\frac{1}{2} \notag
+\end{align}
+\\
+\\
+We observe that due to the shape regularity of $\mathcal{T}$, we have for some constant $c$, 
+\begin{equation} \label{poisson:up_bd2}
+\bigl\{ \displaystyle\sum_{T \in \mathcal{T}} \|w\|^2_{H^1(\tilde{\omega}_T)} + \displaystyle\sum_{E \in \mathcal{E}} \|w\|^2_{H^1(\tilde{\omega}_E)} \bigr\}^\frac{1}{2} \leq c \| w\|_{H^1}
+\end{equation}
+\\
+Using \eqref{poisson:up_bd2} on \eqref{poisson:up_bd6a} we then have, 
+\begin{align} \label{poisson:up_bd3}
+\langle \nabla(u-u_h), \nabla w \rangle \leq  \max\{c_1, c_2\}\bigl\{\sum_{T \in \mathcal{T}} h_T^2\| R_T(u_h)\|^2_T \\
++ \sum_{E \in \mathcal{E}} h_E\| R_E(u_h) \|^2_E \bigr\}^\frac{1}{2} c \| w\|_{H^1} \notag
+\end{align}
+\\
+We wish to use \eqref{eq:poisson_sup} in order to get the final upper bound on the norm of the error. Using \eqref{eq:poisson_sup} on \eqref{poisson:up_bd3} yields the upper bound,
+\begin{equation} \label{eq:poisson_a_posteriori0}
+\| u - u_h \|_{H^1(\Omega)} \leq c^* \bigl\{ \displaystyle\sum_{T \in \mathcal{T}} h_T^2\| R_T\|^2_T + \displaystyle\sum_{E \in \mathcal{E}} h_E\| R_E \|^2_E \bigr\}^\frac{1}{2}
+\end{equation}
+where the constant $c^*$ is defined as
+\begin{align*}
+c^* = \max \{c_1, c_2\} c \sqrt{1+c_\Omega^2}
+\end{align*}
+Note we may use \eqref{eq:poisson_a_posteriori0} as an a posteriori error estimator since it only depends on the numerical solution $u_h$ and the known source term $f$. We summarize the result below.
+\subsection{Preliminary residual error estimator}
+We define a preliminary error estimator $\eta_p$ for the POisson model with elements $T$ and edges $E$, where $R_T$ and $R_E$ are defined as in \eqref{eq:element_res} and \eqref{eq:edge_res},
+\begin{equation} \label{eq:poisson_eta1}
+\eta_p = \bigl\{ \displaystyle\sum_{T \in \mathcal{T}} h_T^2\| R_T\|^2_T + \displaystyle\sum_{E \in \mathcal{E}} h_E\| R_E \|^2_E \bigr\}^\frac{1}{2}
+\end{equation}
+such that for a constant $c^*$ we have,
+\begin{equation} \label{eq:poisson_a_posteriori1}
+\| u - u_h \|_{H^1(\Omega)} \leq c^* \eta_p
+\end{equation}
+\\
+In order to maintain an efficient error estimator, a lower bound on the error is also needed. The next section outlines the derivation of the lower bound for \eqref{eq:poisson_variational}, which is mainly based on the works of Verfürth \cite{verfurth13, verfurth92}.
+\\ 
+%%%%%%%%%%%%%%%%%%%%%%%%% LOWER BOUND %%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Lower bound} \label{section:poisson_lower bound}
+We fix an arbitrary element $\tilde{T}$, and let $w_{\tilde{T}} = (f_T + \Delta u_h) \psi_{\tilde{T}}$ be a test function where $f_T = \frac{1}{|T|}\int_T f \mathrm{d}x$ and $\psi_{\tilde{T}}$ is a bubble function. We insert $w_{\tilde{T}}$ into \eqref{eq:res_L2} to get,
+\begin{equation} \label{lowbd1}
+\langle R, w_{\tilde{T}} \rangle = \displaystyle\sum_{T \in \mathcal{T}}\displaystyle\int_T R_T(u_h)\, w_{\tilde{T}} + \displaystyle\sum_{E \in \mathcal{E}}\displaystyle\int_E R_E(u_h) w_{\tilde{T}} 
+\end{equation}
+\\
+Note that the support of $\psi_{\tilde{T}}$ is $\tilde{T}$, which implies that \eqref{lowbd1} is,
+\begin{equation} \label{eq:lowbd2}
+\langle R, w_{\tilde{T}} \rangle  =  \displaystyle\int_T R_T(u_h)w_{\tilde{T}}
+\end{equation}
+\\
+Recalling again that $\langle R, v \rangle = \langle \nabla (u-u_h) \nabla v\rangle$ of \eqref{eq:poisson_residualb}, we insert this into the left-hand side of \eqref{eq:lowbd2},
+\begin{align} \label{eq:lowbd3}
+\langle \nabla (u-u_h) \nabla w_{\tilde{T}} \rangle = & \, \displaystyle\int_T R_T(u_h)w_{\tilde{T}} \\ 
+= & \, \displaystyle\int_T (f+\Delta u_h) w_{\tilde{T}}  \notag 
+\end{align}
+\\
+Note that this equality requires $w_{\tilde{T}} \in V_h$. Next, we add $\int_T (f_T - f) w_T$ to both sides of \eqref{eq:lowbd3} and insert $w_{\tilde{T}}$ into the integral on the right-hand side,
+\begin{equation} \label{eq:lowbd4}
+\displaystyle\int_T \nabla (u-u_h) \nabla w_{\tilde{T}} + \displaystyle\int_T (f_T - f) w_{\tilde{T}} = \, \displaystyle\int_T (f_T+\Delta u_h)^2 \psi_{\tilde{T}}
+\end{equation}
+\\
+\\
+We now inspect the three terms in \eqref{eq:lowbd4} separately starting with the first term on the left-hand side. For practical reasons, we now let $\tilde{T} = T$. This gives, 
+\begin{align}\label{eq:lowbd5}
+\displaystyle\int_T \nabla (u-u_h) \nabla w_T \leq & \, \| \nabla (u-u_h)\|_T\| \nabla w_T \|_T \\
+= & \, \| \nabla (u-u_h)\|_T\| \nabla((f_T + \Delta u_h)\psi) \|_T \notag\\
+\leq & \, \| \nabla (u-u_h)\|_T c_{I2}h_T^{-1} \|f_T + \Delta u_h)\|_T  \notag
+\end{align}
+\\
+For the second term of \eqref{eq:lowbd4} we have
+\begin{align}\label{eq:lowbd6}
+\displaystyle\int_T (f_T-f) w_T \leq & \, \| f_T-f\|_T \|w_T\|_T \\
+\leq & \, \| f_T-f\|_T \|f_T + \Delta u_h\|_T   \notag
+\end{align}
+To arrive at \eqref{eq:lowbd5} and \eqref{eq:lowbd6} we have used the Cauchy-Schwartz inequality and the inverse estimates for bubble functions \eqref{def:bubble_est}. For the term on the right-hand side we use the second inverse estimate for bubble functions to get,
+\begin{align} \label{eq:lowbd7}
+\displaystyle\int_T (f_T+\nabla u_h)^2 \psi_T \, \geq \, c_{I1}^2 \| f_T + \Delta u_h\|_T^2
+\end{align}
+\\
+Inserting \eqref{eq:lowbd5}, \eqref{eq:lowbd6} and \eqref{eq:lowbd7} into \eqref{eq:lowbd4}, we get the lower bound for an element $T$,
+\begin{align} \label{eq:llowbd8}
+h_T \| f_T + \Delta u_h\|_T \leq c_{I1}^{-2} \left(c_{I2}\|\nabla(u-u_h) \|_T + h_T \|f-f_T\|_T \right)
+\end{align}
+\\
+We will use this inequality later on, so we rename the constants so that $c_1 = c_{I1}^{-2}c_{I2}$ and $c_2 = c_{I1}^{-2}$. This gives, 
+\begin{align} \label{eq:low_bd_element}
+h_T \| f_T + \Delta u_h\|_T \leq c_1\|\nabla(u-u_h) \|_T + c_2 h_T \|f-f_T\|_T
+\end{align}
+\\
+\\
+%%%%%%%%%%%%%%%%%%%%%% LOWER BOUND EDGES %%%%%%%%%%%%%%%%%%%%%%
+Next, we find a lower bound for the edges. Using the same approach as with the elements, we fix an arbitrary edge or face $\tilde{E} \in \mathcal{E}_\Omega$ and insert the test function $w_{\tilde{E}} = R_E(u_h)\psi_{\tilde{E}}$ (where $R_E$ defined as in \eqref{eq:edge_res}) into the $L^2$-representation of the residual \eqref{eq:res_L2},
+\begin{equation} \label{eq:lowbdedge1}
+\langle R, w_{\tilde{E}} \rangle =  \displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \int_T R_T(u_h)\, w_{\tilde{E}}  + \sum_{E \in \mathcal{E}_\Omega} \int_E R_E(u_h) \, w_{\tilde{E}} 
+\end{equation}
+\\
+\\
+Using \eqref{eq:poisson_residualb} for the left-hand side of \eqref{eq:lowbdedge1}, we get,
+\begin{equation}\label{eq:lowbdedge2}
+\displaystyle\int_E \nabla (u-u_h) \nabla w_{\tilde{E}} =  \displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \displaystyle\int_T R_T(u_h)\, w_{\tilde{E}}  + \displaystyle\sum_{E \in \mathcal{E}_\Omega} \displaystyle\int_E R_E(u_h) \, w_{\tilde{E}} 
+\end{equation}
+\\
+Since the support \eqref{def:support} of $\psi_{\tilde{E}}$ is $\omega_{\tilde{E}}$ on \eqref{eq:lowbdedge2} we have, 
+\begin{equation}\label{eq:lowbdedge3}
+\int_{\omega_E} \nabla (u-u_h) \nabla w_{\tilde{E}} = \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \int_T R_T(u_h)\, w_{\tilde{E}} + \int_E \mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h)^2 \psi_{\tilde{E}}
+\end{equation}
+\\
+\\
+We now add and subtract $f_T$ in $R_T$ (where $R_T$ is defined in \eqref{eq:element_res}) in \eqref{eq:lowbdedge3} to get, 
+\begin{align}\label{eq:lowbdedge4a}
+\int_{\omega_E} \nabla (u-u_h) \nabla w_{\tilde{E}} = & \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \left( \int_T (f_T + \Delta u_h) w_{\tilde{E}} + \int_T (f-f_T)w_{\tilde{E}}\right) \\
+& + \int_E \mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h)^2 \psi_{\tilde{E}} \notag
+\end{align}
+We now let $\tilde{E} = E$ for practicality. First, we look at the term on the left-hand side of the \eqref{eq:lowbdedge4a} and use the inverse estimate for a face or edge bubble function \eqref{def:bubble_est} to get,
+\begin{equation} \label{eq:lowbdedge5}
+\displaystyle\int_{\omega_E} \nabla (u-u_h) \nabla w_{\tilde{E}} \leq \| \nabla (u-u_h) \|_{H^1(\omega_E)} c_{I4}h_E^{-\frac{1}{2}} \|\mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h)\|_E
+\end{equation} 
+\\
+Next, the three terms on the right-hand side yields,
+\\
+\begin{equation} \label{eq:lowbdedge6}
+\displaystyle\int_E \mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h)^2 \psi_E \geq c_{I3}^2 \|\mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h)\|_E^2
+\end{equation}
+\\
+and
+\begin{equation} \label{eq:lowbdedge7}
+\displaystyle\sum_{\substack{T \in \mathcal{T} \\E \in \mathcal{E}_\Omega}} \displaystyle\int_T (f_T + \Delta u_h) w_{\tilde{E}} \leq \displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \|f_T + \Delta u_h\|_T c_{I5}h_E^{\frac{1}{2}} \|\mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h)\|_E
+\end{equation}
+\\
+and 
+\begin{equation} \label{eq:lowbdedge8}
+\displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \displaystyle\int_T (f-f_T)w_{\tilde{E}} \leq  \displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \|f-f_T\|_T c_{I5} h_E^{\frac{1}{2}} \|\mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h)\|_E
+\end{equation}
+\\
+\\
+Recall that $R_E = \mathbb{J}_E(\mathbf{n}_E \cdot \nabla u_h)$ from \eqref{eq:edge_res}. Combining the terms \eqref{eq:lowbdedge5}-\eqref{eq:lowbdedge8} and inserting them into \eqref{eq:lowbdedge4a}, we have for every face or edge $E$,
+\begin{align} \label{eq:lowbdedge10a}
+c_{I3}^{2}\|R_E\|_E \leq & \, c_{I4} h_E^{-\frac{1}{2}}\| \nabla (u-u_h) \|_{H^1(\omega_E)} \\
+& \, + c_{I5}\displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} h_E^{\frac{1}{2}} \left(\|f_T + \Delta u_h\|_T + \|f-f_T\|_T\right) \notag
+\end{align}
+\\
+Next, we multiply \eqref{eq:lowbdedge10a} by $c_{I3}^{-2}h_E^{\frac{1}{2}}$ and combine \eqref{eq:low_bd_edge} with the inequality \eqref{eq:low_bd_element}, which yields,
+\begin{align} \label{eq:low_bd_edge12}
+h_E^{\frac{1}{2}} \|R_E\|_E \leq & \, c_{I3}^{-2}c_{I4} \| \nabla (u-u_h) \|_{H^1(\omega_E)} \\
+& + h_E\|f-f_T\|_T \notag \\
+& \, + c_{I3}^{-2}c_{I5}c_{I1}^{-2} \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \left(c_{I2}\|\nabla(u-u_h)\|_T + h_E \|f-f_T\|_T \right) \notag
+\end{align}
+From \eqref{eq:low_bd_edge12} it follows that,
+\begin{align} \label{eq:low_bd_edge13}
+h_E^{\frac{1}{2}} \|R_E\|_E \leq & \, c_{I3}^{-2}c_{I4} \| \nabla (u-u_h) \|_{H^1(\omega_E)} \\
+& \, + c_{I3}^{-2}c_{I5}\displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} c_{I1}^{-2}c_{I2}\|\nabla(u-u_h) \|_T \notag \\
+& \hspace{1.5cm} + h_E (c_{I1}^{-2} +1) \|f-f_T\|_T \notag
+\end{align}
+Rearranging the right-hand side of \eqref{eq:low_bd_edge13},
+\begin{align} \label{eq:low_bd_edge14}
+h_E^{\frac{1}{2}} \|R_E\|_E \leq & \, c_{I3}^{-2}(c_{I4} + c_{I1}^{-2}c_{I2}c_{I5}) \| \nabla (u-u_h) \|_{H^1(\omega_E)} \\
+& \, +\displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}}  c_{I3}^{-2}c_{I5}(c_{I1}^{-2} +1) h_E\|f-f_T\|_T \notag
+\end{align}
+\\
+Renaming the constants in \eqref{eq:low_bd_edge14} such that $c_3 = c_{I3}^{-2}(c_{I4} + c_{I1}^{-2}c_{I2}c_{I5})$, $c_4 = c_{I3}^{-2}c_{I5}(c_{I1}^{-2} +1)$, we have,
+\begin{align} \label{eq:low_bd_edge}
+h_E^{\frac{1}{2}} \|R_E\|_E \leq c_3 \| \nabla (u-u_h) \|_{H^1(\omega_E)} +\displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}}  c_4 h_E\|f-f_T\|_T
+\end{align}
+\\
+We now add \eqref{eq:low_bd_element} and \eqref{eq:low_bd_edge} together,
+\begin{align} \label{eq:low_bd_edge15a}
+h_T \| f_T + \Delta u_h\|_T + h_E^{\frac{1}{2}} \|R_E\|_E \leq & \, (c_1 + c_3)\|\nabla(u-u_h) \|_{H^1(\omega_T)} \\
+& + c_2 h_T \|f-f_T\|_T \notag \\
+& +\displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}}  c_4 h_E\|f-f_T\|_T \notag
+\end{align}
+The inequality \eqref{eq:low_bd_edge15a} may be bounded such that, 
+\begin{align*}
+h_T \| f_T + \Delta u_h\|_T + h_E^{\frac{1}{2}} \|R_E\|_E \leq & \,(c_1 + c_3)\|\nabla(u-u_h) \|_{H^1(\omega_T)} \\
+& +\displaystyle\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} (c_2 h_T + c_4 h_E)\|f-f_T\|_T \notag
+\end{align*}
+We then arrive at,
+\begin{align} \label{eq:low_bd_edge15}
+h_T \| f_T + \Delta u_h\|_T + h_E^{\frac{1}{2}} \|R_E\|_E  \leq & \, (c_1 + c_3)\|\nabla(u-u_h) \|_{H^1(\omega_T)} \\
+& +\displaystyle\sum_{\substack{T' \in \mathcal{T} \\ \mathcal{E}_{T'} \cap \mathcal{E}_{T} \neq \emptyset}} (c_2 + c_4)h_{T'} \|f-f_{T'}\|_{T'} \notag
+\end{align}
+\\
+Using Cauchy-Schwarz on \eqref{eq:low_bd_edge15} yields,
+\begin{align} \label{eq:low_bd_edge18}
+\bigl\{ h_T^2 \| f_T + \Delta u_h\|^2_T + h_E \|R_E\|_E^2 \bigr\}^{\frac{1}{2}} \leq & \,\max\{c_1+c_3, c_2+c_4\} \\
+& \cdot \bigl\{\|\nabla(u-u_h) \|^2_{H^1(\omega_T)} \notag \\
+& \quad +\sum_{\substack{T' \in \mathcal{T} \\ \mathcal{E}_{T'} \cap \mathcal{E}_T \neq \emptyset}} h^2_{T'} \|f-f_{T'}\|^2_{T'} \bigr\}^{\frac{1}{2}} \notag 
+\end{align}
+\\
+Let, 
+\begin{align} \label{poisson:eta_2} 
+\eta = \bigl\{h^2_T \| f_T + \Delta u_h\|^2_T + h_E \|R_E\|^2_E \bigr\}^{\frac{1}{2}}
+\end{align}
+We finally arrive at the following lower bound for the norm of the error,
+\\
+\begin{align} 
+\eta \leq  c_* \bigl\{\|u-u_h\|^2_{H^1(\omega_T)} + \sum_{T \in \mathcal{T}} h_T^2\|f-f_T\|^2_T\bigr\}^{\frac{1}{2}}
+\end{align}
+where $c_* = \max\{c_1 + c_3, c_2+ c_4\}$. 
+\\
+\\
+\\
+As we stated at the beginning of the section, we wish to bound the error up to a multiplicative constant from both above and below using the residuals. To use $\eta$ as a residual a posteriori error estimator, we will need to show that this is fulfilled. We observe that using the triangle inequality on \eqref{eq:poisson_a_posteriori0} yields, 
+\begin{align}
+\| u - u_h \|_{H^1(\Omega)} \leq & \, c^* \bigl\{\sum_{T \in \mathcal{T}} h_T^2\| f + \Delta u_h\|^2_T + \sum_{E \in \mathcal{E}} h_E\| R_E \|^2_E \bigr\}^\frac{1}{2} \\
+\leq & \, c^* \bigl\{\sum_{T \in \mathcal{T}} h_T^2\| f_T + \Delta u_h + f - f_T\|^2_T + \sum_{E \in \mathcal{E}} h_E\| R_E \|^2_E \bigr\}^\frac{1}{2} \notag\\
+\leq & \, c^* \bigl\{\sum_{T \in \mathcal{T}} h_T^2\| f_T + \Delta u_h\|^2_T + h_T^2\|f - f_T\|^2_T + \sum_{E \in \mathcal{E}} h_E\| R_E \|^2_E \bigr\}^\frac{1}{2} \notag
+\end{align}
+It then follows from the definition of $\eta$ \eqref{poisson:eta_2} that,
+\begin{align} \label{eq:low_bd_edge17}
+\| u - u_h \|_{H^1(\Omega)}\leq & \, c^* \bigl\{\sum_{T \in \mathcal{T}} \eta^2 + h_T^2\|f - f_T\|^2_T \bigr\}^{\frac{1}{2}} 
+\end{align}
+\\
+We have now derived a residual-based upper and a lower bound on the norm of the error with the error estimator $\eta$. A summary of the results follows below.
+\\
+\subsection{Residual a posteriori error estimate}
+For every element $T \in \mathcal{T}$ we define the residual a posteriori error estimator $\eta$ so that,
+\begin{equation}
+\| u - u_h \|_{H^1(\Omega)} \leq c^* \eta
+\end{equation}
+where we derived two possible estimators: $\eta_p$ and $\eta$, which are defined as, 
+\begin{equation}
+\eta_p = \bigl\{ \sum_{T \in \mathcal{T}} h_T^2\| R_T\|^2_T + \displaystyle\sum_{E \in \mathcal{E}} h_E\| R_E \|^2_E \bigr\}^{\frac{1}{2}}
+\end{equation}
+and, 
+\begin{equation}
+\eta = \bigl\{ h_T^2 \|f_T + \Delta u_h\|_T^2  + \sum_{E \in \mathcal{E}} h_E \|R_E\|_E^2 \bigr\}^{\frac{1}{2}}
+\end{equation}
+As previously mentioned, the difference between these two estimators is the data terms, where we in $\eta_p$ use the original data, whereas in $\eta$ use the discrete data. In addition, $\eta$ yields a lower bound as well as an upper bound.
+\\
+\\
+The a posteriori error estimator $\eta$ creates a bound from above and below with constants $c^*$ and $c_*$ such that for all $T \in \mathcal{T}$,
+\begin{align} \label{eq:poisson_a_posteriori2}
+\|u - u_h\|_{H^1} \leq c^*\bigl\{ \displaystyle\sum_{T \in \mathcal{T}} \eta^2 + \displaystyle\sum_{T \in \mathcal{T}} h_T^2 \|f-f_T\|_T^2 \bigr\}^{\frac{1}{2}}
+\end{align}
+and
+\begin{align}
+\eta \leq c_* \bigl\{ \|u-u_h \|^2_{H^1(\omega_T)} + \displaystyle\sum_{T' \in \mathcal{T}} h_{T'}^2 \|f-f_{T'}\|_{T'}^2 \bigr\}^{\frac{1}{2}}
+\end{align}
+All the constants that appeared in the lower bounds ($c_{I1}, .., c_{I5}$) depends on the shape parameter $C_\mathcal{T}$, hence $c^*$ will depend on this as well. 
+\\
+\\
+The first term in $\eta$ is related to the residual of $u_h$ based on the strong solution of the equation. The second term is associated with the boundary operator which links the strong and weak form of the differential equation. The term $h_T \|f-f_T\|_K$ is referred to as data oscillation. 
+
+
+
+\subsection{Expected convergence rates} \label{poisson_expected_rates}
+We will inspect each term in the a posteriori error estimators and deduce what convergence rate we expect to see in our numerical experiments, see chapter \ref{chap:experiments}. For the preliminary a posteriori error estimator, $\eta_p$ we have for $\mathcal{P}^k \subseteq V$,
+\begin{equation}
+\eta_p \leq h^{k}\left(c_{T1}\| R_T\|^2_T + c_{T2}\| R_E \|^2_E\right)^\frac{1}{2}
+\end{equation}
+This follows from applying the trace inequality \ref{def:trace} on the jump term $\| R_E \|_E$, and then using the polynomial approximation property \ref{def:approx} with $m=0$ and $t=k$. We expect to see the same for $\eta$ by the same arguments. 
+\\
+\\
+Subsequently, we will expect to see these convergence rates in the numerical experiments which can be found in section  \ref{section:num_exp_poisson}. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%% BIOT MODEL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Multiple-network poroelasticity model (MPET)} \label{section:error_mpet}
+The subsequent sections present the a posteriori error estimates for MPET with one network and two networks, i.e. the Biot model and the Barenblatt-Biot model, respectively. We will base the derivation for the Biot model on the paper by Ern and Meunier \cite{meunier}. Then, we will extend the analysis for an additional network for the Barenblatt-Biot model. The derivation for the MPET model with two networks is the main result of this thesis. The methods used for finding the lower bounds are more or less the same as for the Poisson model, while the methods for finding the upper bounds will need some additional analysis since the MPET model is time-dependent. 
+
+\subsection{Single network poroelasticity} \label{section:error_biot}
+This section will derive the a posteriori error estimators for the MPET model with a single network, also known as the Biot model. The following analysis is based on the derivation in \cite{meunier}, which constructs the a posteriori error estimate for the Biot model consisting of three terms, a space error indicator, a time error indicator and a data oscillation term. This derivation is based on the assumption that the strong solution of \eqref{eq:mpet1}-\eqref{eq:mpet2} exist. %The construction of the a posteriori error estimates will occur in the following way \todo{explain!}
+\\
+\\ 
+Since the Biot model is a space-time problem, we start by rewriting the discrete problem as a problem holding a.e. in $(0,T)$ instead of holding at the discrete time steps $\{t_n\}_{n=1}^N$. We assume $u_{h_\tau}$ and $p_{h_\tau}$ to be continuous affine functions in time such that $u_{h_\tau}(t_n) = u_h^n$ ($p_{h_\tau}(t_n) = p_h^n$) for all $n \in \{0,..,N\}$. Also $\partial_t u_{h_\tau}$ and $\partial_t p_{h_\tau}$ are defined a.e. in $(0,T)$. We let $f_{h_\tau}$ be a continuous piecewise affine function in time such that $f_{h_\tau}(t_n) = f_h^n$ for all $n \in \{0,..,N\}$. We also assume $\pi^0p_{h_\tau}$ and $\pi^0g_{h_\tau}$ to be piecewise constant functions in time equal to $p_h^n$ and $g_h^n$ respectively, on each interval $I_n = (t_{n-1}, t_n)$ for all $n \in \{1,..,N\}$. 
+\\ \\
+Using the bilinear form from \eqref{bilinear} we get a new discrete scheme that holds a.e. in $(0,T)$, 
+\begin{align}
+a(u_{h_\tau}, v_h) - b(v_h, p_{h_\tau}) = & \, \langle f_{h_\tau}, v_h \rangle \hspace{0.4cm} \forall v_h \in \hat{V}_h \label{biot:bilineaR_u} \\
+c(\partial_t p_{h_\tau}, q_h) + b(\partial_t u_{h_\tau}, q_h) + d(\pi^0p_{h_\tau}, q_h) = & \, \langle \pi^0g_{h_\tau}, q_h \rangle \hspace{0.2cm} \forall q_h \in \hat{Q}_h \label{biot:bilineaR_p}
+\end{align}
+\\
+We define the residuals for the system \eqref{biot:bilineaR_u}-\eqref{biot:bilineaR_p} which holds for every $v \in V$ and $q \in Q$,
+\begin{align}
+\langle R_u(u_{h_\tau}, p_{h_\tau}), v\rangle := & \, \langle f_{h_\tau}, v\rangle - a(u_{h_\tau}, v) + b(v, p_{h_\tau}) \\
+\langle R_p(u_{h_\tau}, p_{h_\tau}), q\rangle := & \, \langle \pi^0g_{h_\tau}, q \rangle - c(\partial_t p_{h_\tau}, q) - b(\partial_t u_{h_\tau}, q) - d(\pi^0p_{h_\tau}, q)
+\end{align}
+\subsubsection{Element and edge residuals}
+We do integration by parts on the terms with higher-order test functions to arrive at the element and edge residuals. Using \eqref{eq:res_L2} we have the following formulation for the residual $R_u$ denoted as $R_U$,
+\begin{align} \label{eq:gen_res}
+\langle R_U, w \rangle = & \, \sum_{T \in \mathcal{T}_h} \int_T R_{u,T} w + \sum_{E \in \mathcal{E}_\Omega} \int_E R_{u,E} w  
+\end{align}
+where $R_{u,T}$ denotes the element residual and $R_{u,E}$ denotes the edge residual for the residual $R_u$. The same applies to $R_p$. 
+\\
+\\
+Thus, for $R_u$ we have for all $m\in\{0,...,N\}$ the following element and edge residuals, 
+\\
+\begin{align} \label{biot_element_res}
+R_{u,T}(u_h^m,p_h^m) = & \, f_h^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha \nabla p_h^m \hspace{2.2cm}  T \in \mathcal{T}\\ 
+R_{u,E}(u_h^m,p_h^m)  = & \, \begin{cases} 
+	\alpha \, \mathbb{J}_E(\mathbf{n}_E \cdot p_h^m) - \mathbb{J}_E(\mathbf{n}_E \cdot \sigma^{\ast}(u_h^m)) & \quad  E \in \mathcal{E}_\Omega \\
+     0 & \quad E \in \mathcal{E}_{\Gamma_D} \\
+\end{cases}
+\end{align} 
+We define $R_p$ similarly, where $R_{p,T}$ is defined as the element residual and $R_{p,E}$ as the edge/face residual. We thus have for every $m \in \{0,...,N\}$,
+\\
+\begin{align}
+R_{p,T}(u_h^m,p_h^m)  = & \, g^m_h - c\partial_t p^m_h - \alpha \nabla \cdot \partial_t u_h^m + K \Delta p_h^m \quad  T \in \mathcal{T}\\ 
+R_{p,E}(u_h^m,p_h^m)  = & \, \begin{cases} 
+	- K \mathbb{J}_E(\mathbf{n}_E \cdot \nabla p_h^m)  & \hspace{2.5cm}  E \in \mathcal{E}_\Omega \\
+     0 & \hspace{2.5cm} E \in \mathcal{E}_{\Gamma_D} \\
+\end{cases}
+\end{align}
+To alleviate some notation, we let $R_{u,T}(u_h^m,p_h^m)$ be denoted as $R^m_{uh}$ and $R_{u,E}(u_h^m,p_h^m)$ as $J^m_{uh}$ (equivalent for $R_p$).
+\\
+\\
+\subsubsection{Upper bound} \label{biot_proof_struc}
+In order to find an upper bound on the norm of the error, we start by letting $\hat{u}=u-u_{h_\tau}$, $\hat{p}=p-p_{h_\tau}$ and $\hat{p}^*=p-\pi^0p_{h_\tau}$. Using \eqref{biot:bilineaR_u} and \eqref{biot:bilineaR_p}, we then have a.e. in $(0,T)$ 
+\\
+\begin{align}
+a(\hat{u}, v) - b(v, \hat{p}) = & \, \langle R_u + f - f_{h_\tau}, v \rangle \hspace{0.2cm} \forall v \in \hat{V} \label{biot:up_bd1}\\
+c(\partial_t \hat{p}, q) + b(\partial_t \hat{u}, q) + d(\hat{p}^*, q) = & \, \langle R_p + g - \pi^0g_{h_\tau}, q \rangle \hspace{0.2cm} \forall q \in \hat{Q} \label{biot:up_bd1_1}
+\end{align}
+\\
+We insert test functions $v=\partial_t \hat{u}$ and $q=\hat{p}$ into \eqref{biot:up_bd1} and \eqref{biot:up_bd1_1} such that,
+\begin{align} \label{biot:up_bd2}
+a(\hat{u}, \partial_t \hat{u}) - b(\partial_t \hat{u}, \hat{p}) = & \, \langle R_u + f - f_{h_\tau}, \partial_t \hat{u} \rangle \hspace{0.2cm} \forall v \in \hat{V} \\ \label{biot:up_bd2_a}
+c(\partial_t \hat{p}, \hat{p}) + b(\partial_t \hat{u}, \hat{p}) + d(\hat{p}^*, \hat{p}) = & \, \langle R_p + g - \pi^0g_{h_\tau}, \hat{p} \rangle \hspace{0.2cm} \forall q \in \hat{Q}
+\end{align}
+\\
+Adding \eqref{biot:up_bd2}-\eqref{biot:up_bd2_a} together yields, 
+\begin{align} \label{biot:up_bd2_add}
+a(\hat{u}, \partial_t \hat{u}) + c(\partial_t \hat{p}, \hat{p}) + d(\hat{p}^*, \hat{p})=  \langle R_u + f - f_{h_\tau}, \partial_t \hat{u} \rangle + \langle R_p + g - \pi^0g_{h_\tau}, \hat{p} \rangle
+\end{align}
+Note that the $b$-forms cancel each other out when we add them together as they are adjoints. The bilinear form $d$ is symmetric such that,
+\begin{equation} \label{biot:bilinear_sym}
+d(\hat{p}, \hat{p}^*) = \tfrac{1}{2}d(\hat{p}, \hat{p}) + \tfrac{1}{2}d(\hat{p}^*, \hat{p}^*) - \tfrac{1}{2}d(\hat{p}-\hat{p}^*, \hat{p}-\hat{p}^*)
+\end{equation}
+\\
+We observe that $\langle u, \partial_t u \rangle_a = \tfrac{1}{2}\tfrac{d}{dt} \|u(t)\|^2$ \cite{ern}. Using this and applying the symmetry of $d$ on \eqref{biot:up_bd2_add} yields,
+\\
+\begin{align} \label{biot:up_tmp_1}
+\tfrac{1}{2} d_t \|\hat{u}\|_a^2 + \tfrac{1}{2} d_t \|\hat{p}\|_c^2 + \tfrac{1}{2} \|\hat{p}\|_d^2 + \tfrac{1}{2} \|\hat{p}^*\|_d^2 = & \, \langle R_u + f - f_{h_\tau}, \partial_t \hat{u} \rangle_a \\
+& \, + \langle R_p + g - \pi^0g_{h_\tau}, \hat{p} \rangle_d \notag\\
+& \, + \tfrac{1}{2} \|p_{h_\tau} - \pi^0p_{h_\tau}\|_d^2 \notag 
+\end{align}
+Note that we have moved the $d(\hat{p}-\hat{p}^*, \hat{p}-\hat{p}^*)$ term over to the right side and inserted the test functions. 
+\\
+\\
+Using that $R_p + g - \pi^0g_{h_\tau} \in Q_h$ we have, 
+\begin{equation} \label{biot:res_P_bd}
+\langle R_p + g - \pi^0g_{h_\tau}, \hat{p} \rangle_d 
+ \leq \| R_p + g - \pi^0g_{h_\tau} \|_{d'} \| \hat{p} \|_d
+\end{equation}
+with the dual norm  $\|\cdot\|_{d'} = \sup_{0 \neq v \in Q} \|\langle \cdot, q \rangle_d\| / \|q\|_d$.
+\\
+\\
+Using Young's inequality on \eqref{biot:res_P_bd} with $p=q=2$ and $\epsilon=2$ gives,
+\begin{equation}\label{biot:res_P_bd_2}
+\langle R_p + g - \pi^0g_{h_\tau}, \hat{p} \rangle_d \leq \| R_p + g - \pi^0g_{h_\tau} \|^2_{d'} + \tfrac{1}{4} \|\hat{p} \|^2_d
+\end{equation}
+\\
+Using \eqref{biot:res_P_bd_2} on \eqref{biot:up_tmp_1}, we arrive at the following bound,
+\\
+\begin{align}\label{biot:up_bd_tmp}
+\tfrac{1}{2} d_t \|\hat{u}\|_a^2 + \tfrac{1}{2} d_t \|\hat{p}\|_c^2 + \tfrac{1}{4}\|\hat{p}\|_d^2 + \tfrac{1}{2} \|\hat{p}^*\|_d^2 \leq & \, \langle R_u + f - f_{h_\tau}, \partial_t \hat{u} \rangle_a  \\
+ & \, + \|R_p + g - \pi^0g_{h_\tau}\|_{d'}^2 \notag \\
+ & \, + \tfrac{1}{2} \|p_{h_\tau} - \pi^0p_{h_\tau}\|_d^2 \notag
+\end{align}
+\\
+Note that the bilinear form $a(\cdot, \cdot)$ with inner product $\langle \cdot, \cdot \rangle_a$ induce a norm $\|\cdot\|_a = \sqrt{a(\cdot, \cdot)}$ (resp. for $d$).
+\\
+\\
+We now integrate from $0$ to $t_n$ for all $n=\{1,...,N\}$. In addition, we do an integration by parts on the right-hand side of \eqref{biot:up_bd_tmp}. This yields,
+\\
+\begin{align} \label{biot:up_bd3}
+& \tfrac{1}{2}\|u^n - u^n_{h_\tau} \|^2_a - \tfrac{1}{2}\|u_0 - u_{0 h} \|^2_a + \tfrac{1}{2}\|p^n - p^n_{h_\tau} \|^2_c - \tfrac{1}{2}\|p_0 - p_{0 h} \|^2_c \\
+& + \tfrac{1}{4}\int_0^{t_n} \|(p - p_{h_\tau})(s) \|^2_d \, ds  + \tfrac{1}{2}\int_0^{t_n} \|(p - \pi^0p_{h_\tau})(s) \|^2_d \, ds \notag\\
+& = \langle R_u + f - f_{h_\tau}, \hat{u}\rangle_a \big|_0^T - \int_0^{T} \langle \partial_t (R_u(s) + f - f_{h_\tau}), \hat{u}(s)\rangle_a \, ds \notag \\
+& + \int_0^{T} \| (R_p + g-\pi^0g_{h_\tau})(s) \|^2_{d'} \, ds + \tfrac{1}{2} \int_0^{T} \|(p_{h_\tau}-\pi^0p_{h_\tau})(s)\|_d^2 ds \notag
+\end{align}
+\\
+We look at the first three terms on the right-hand side of \eqref{biot:up_bd3} and evaluate them separately. Observe that,
+\begin{align} \label{biot:up_bd5}
+\langle R_u + f - f_{h_\tau}, \hat{u}\rangle_a \big|_0^T = & \, \langle (R_u + f - f_{h_\tau})(T), \hat{u}(T)\rangle_a \\ 
+& \, - \langle (R_u + f - f_{h_\tau})(0), \hat{u}(0)\rangle_a \notag
+\end{align}
+Equation \eqref{biot:up_bd5} can in turn be bounded such that, 
+\begin{align}\label{biot:up_bd5a}
+\langle R_u + f - f_{h_\tau}, \hat{u}\rangle_a \big|_0^T \leq & \, 2 \sup_{s \in [0,T]} \| (R_u + f - f_{h_\tau})(s)\|_a\| \hat{u}(s)\|_a 
+\end{align}
+We may also bound the two middle terms of the right-hand side of \eqref {biot:up_bd3} such that,
+\begin{align} \label{biot:up_bd6}
+\int_0^{T} \langle \partial_t R_u + f - f_{h_\tau}, \hat{u}(s)\rangle_a \, ds \leq & \, \int_0^{T} \| \partial_t (R_u + f - f_{h_\tau})(s)\|_a \|\hat{u}(s)\|_a \, ds
+\end{align}
+and, 
+\begin{align} \label{biot:up_bd7}
+\int_0^{T} \| (R_p + g-\pi^0g_{h_\tau})(s) \|^2_{d'} \, ds 
+\leq & \, \int_0^{T} \left(\| R_p(s)\|_{d'}  + \|(g-\pi^0g_{h_\tau})(s)\|_{d'} \right)^2\, ds
+\end{align}
+\\
+\\
+Now let, $\sigma(u) = \sup_{s \in [0,T]} \| \hat{u}(s)\|_a$ and,
+\\
+\begin{align*}
+A = & \, \, 2 \sup_{s \in [0,T]} \left(\| R_u(s)\|_a\|  + \| (f - f_{h_\tau})(s)\|_a\right) \\
+& + \int_0^{T} \| \partial_t R_u (s)\|_a \, ds  + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds \notag
+\end{align*}
+\\
+and,
+\begin{align*}
+B^2 = & \, \int_0^{T} \bigl( \| R_p(s)\|_{d'} + \|(g-\pi^0g_{h_\tau})(s)\|_{d'}\bigr)^2\, ds \\
+& \, + \tfrac{1}{2} \int_0^{T} \|(p_{h_\tau}-\pi^0p_{h_\tau})(s)\|_d^2 ds \notag\\
+& \, + \tfrac{1}{2}\|u_0 - u_{0 h} \|^2_a + \tfrac{1}{2}\|p_0 - p_{0 h} \|^2_c \notag
+\end{align*}
+\\
+We use \eqref{biot:up_bd5a}, \eqref{biot:up_bd6} and \eqref{biot:up_bd7} and our definitions of $A$, $B^2$ and $\sigma(u)$ to arrive at the following bound on the norm of the error, 
+\\
+\begin{align} \label{biot:up_bd4}
+\tfrac{1}{2}\|u^n - u^n_{h_\tau} \|^2_a + \tfrac{1}{2}\|p^n - p^n_{h_\tau} \|^2_c
++ \tfrac{1}{4}\int_0^{t_n} \|(p - p_{h_\tau})(s) \|^2_d \, ds \\ 
++ \tfrac{1}{2}\int_0^{t_n} \|(p - \pi^0p_{h_\tau})(s) \|^2_d \, ds \leq A\sigma(u) + B^2 \notag
+\end{align}
+\\
+An immediate consequence of \eqref{biot:up_bd4} is $\tfrac{1}{2}\| \hat{u}(s)\|_a \leq A\sigma(u) + B^2$ since all the terms on the left-hand side are positive. Since $s \in [0,T]$ is arbitrary it must hold for all $s \in [0,T]$. Thus, the inequality holds for the supremum over all $s \in [0,T]$. This yields, 
+\begin{equation}
+\tfrac{1}{2} \sup_{s \in [0,T]} \| \hat{u}(s)\|_a \leq A \sigma(u) + B^2
+\end{equation}
+Using the notation for $\sigma(u)$ we thus have, 
+\begin{equation}
+\tfrac{1}{2} \sigma(u)^2 \leq A \sigma(u) + B^2 \iff \sigma(u)^2 \leq 2A \sigma(u) + 2B^2 
+\end{equation}
+Applying Young's inequality with $p=q=2$ and $\epsilon=2$ on we $2A \sigma(u)$ we have, 
+\begin{equation} \label{biot:sigma_young}
+\sigma(u)^2 \leq 2A \sigma(u) + 2B^2 \leq 2A^2 + \frac{\sigma(u)^2}{2} + 2B^2
+\end{equation}
+Let the left-hand side of \eqref{biot:up_bd4} be denoted as the error $e^n$. Rearranging \eqref{biot:sigma_young} yields,
+\begin{align} \label{biot:error1}
+e^n \leq A\sigma(u) + B^2 \leq 4(A^2 + B^2)
+\end{align}
+We now arrive at the bound,
+\begin{align}
+e^n \leq & \, \, 4\, \bigl(2 \sup_{s \in [0,T]} \| R_u(s)\|_a\| + \int_0^{T} \| \partial_t R_u (s)\|_a \, ds  \bigr)^2 \\
+& + 4\, \bigl( 2 \sup_{s \in [0,T]} \| (f - f_{h_\tau})(s)\|_a + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds \bigr)^2  \notag\\
+& + 4 \int_0^{T} (\| R_p(s)\|^2_{d'}  + \|(g-\pi^0g_{h_\tau})(s)\|^2_{d'} ) \, ds + \|u_0 - u_{0 h} \|^2_a \notag\\
+& + \|p_0 - p_{0 h} \|^2_c + \int_0^{T} \|(p_{h_\tau}-\pi^0p_{h_\tau})(s)\|_d^2 ds \notag
+\end{align}
+\\
+\\
+Observe that since $R_u$ is piecewise affine, and $R_p$ is piecewise constant we have,
+\begin{align}\label{biot:affine1}
+\int_0^{T} \| R_p(s)\|^2_{d'}\, ds = & \, \sum_{m=1}^N \tau_m \| R_p^m\|^2_{d'} \\
+\int_0^{T} \| \partial_t R_u (s)\|_a \, ds = & \, \sum_{m=1}^N \| R_u^m - R_u^{m-1}\|_{d'} \label{biot:affine2}
+\end{align}
+\\
+We also observe that $\int_0^{T} \|(p_{h_\tau}-\pi^0p_{h_\tau})(s)\|_d^2 ds$ may be approximated by linear interpolation, where we have for $s \in I_m$,
+\\
+\begin{align}
+(p_{h_\tau}-\pi^0p_{h_\tau})(s)=\tau_m^{-1}(s-t_{m-1})(p_h^m - p_h^{m-1})
+\end{align}
+Thus, when we integrate over all intervals $I_m = [t_{m-1}, t_m]$ on $(0,T)$ we get,
+\begin{align}
+\int_{t_{m-1}}^{t_m} \|(p_{h_\tau}-\pi^0p_{h_\tau})(s)\|_d^2 ds = & \, \int_{t_{m-1}}^{t_m} \|\tau_m^{-1}(s-t_{m-1})(p_h^m - p_h^{m-1})\|_d^2 ds \\
+= & \, \tau_m^{-2}\int_{t_{m-1}}^{t_m} \hat{s}^2\|(p_h^m - p_h^{m-1})\|_d^2 d\hat{s} \notag\\
+= & \, \tau_m^{-2} \frac{1}{3}\hat{s}^3\big|_{t_{m-1}}^{t_m} \|(p_h^m - p_h^{m-1})\|_d^2 \notag\\
+= & \, \tau_m^{-2} \frac{1}{3}\tau_m^3 \|(p_h^m - p_h^{m-1})\|_d^2 \notag
+\end{align}
+Summing over all time steps further yields,
+\begin{align} \label{biot:time_est_outline}
+\int_0^{T} \|(p_{h_\tau}-\pi^0p_{h_\tau})(s)\|_d^2 ds = \sum_{m=1}^N \frac{1}{3}\tau_m \| p_h^m - p_h^{m-1}\|_d^2
+\end{align}
+\\
+Combining \eqref{biot:error1} with \eqref{biot:affine1}, \eqref{biot:affine2} and \eqref{biot:time_est_outline}, we arrive at an upper bound on the norm of the error, with $e^n$ defined as above, for all for all $n \in \{1,...,N\}$,
+\begin{align} \label{biot_final_up_bd}
+e^n \leq \mathcal{E}_{\textnormal{dat}} + \mathcal{E}_{\textnormal{spc}} + \mathcal{E}_{\textnormal{tim}} 
+\end{align}
+where we define the data, space and time error estimators as,
+\begin{align} \label{biot:est_dat}
+\mathcal{E}_{\textnormal{dat}} = & \, \|u_0 - u_{0 h} \|^2_a + \|p_0 - p_{0 h} \|^2_c + 4\mathcal{E}(f,g) \\
+& + 4 \int_0^{T} \|(g-\pi^0g_{h_\tau})(s)\|^2_{d'}\, ds \notag\\
+& \, + 4\left( 2 \sup_{s \in [0,T]} \| (f - f_{h_\tau})(s)\|_a + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds \right)^2 \notag\\
+\notag\\
+\mathcal{E}_{\textnormal{spc}} = & \,  4 \tau_m\sum_{m=1}^N \| R_p^m\|^2_{d'} + 4\biggl(2 \sup_{0 \leq m \leq N} \| R_u^m\|_a + \sum_{m=1}^N \| R_u^m - R_u^{m-1}\|_a \biggr)^2 \label{biot:est_spc}\\
+\notag\\
+\mathcal{E}_{\textnormal{tim}} = & \, \sum_{m=1}^N \frac{1}{3}\tau_m \|p^m_h - p^{m-1}_h\|_d^2 \label{biot:est_tim}\\
+\notag\\
+\mathcal{E}(f,g) = & \, \int_0^{T}  \|(g-\pi^0g_{h_\tau})(s)\|^2_{d'} \, ds \notag \\
+& \, + \biggl( 2 \sup_{s \in [0,T]} \| (f - f_{h_\tau})(s)\|_a + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds \biggr)^2 \notag
+\end{align}
+
+\subsubsection{Lower bound} \label{biot_low_bd}
+To obtain the lower bound we use the same approach as in \ref{lowbd1} with bubble functions. We start with the first equation \eqref{biot:bilineaR_u} which has residual $R_u$. We refer to the derivations done for the Poisson problem, see section \ref{section:poisson_lower bound} (or more specifically equations \eqref{lowbd1}-\eqref{eq:lowbd7}), for details regarding the following methods. 
+\\
+\\
+Starting with fixing an arbitrary element $\tilde{T}$, and setting $w_{\tilde{T}} = f_T^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha \nabla p_h^m \psi_{\tilde{T}}$ where $f^m_T = \frac{1}{|T|}\int_T f^m \mathrm{d}x$ and $\psi_{\tilde{T}}$ is a bubble function. Using \eqref{eq:gen_res} for $R_u$, we now insert $w_{\tilde{T}}$ as a test function to get, 
+\begin{align}
+\langle R_{U}(u^m, p^m), w_{\tilde{T}} \rangle = & \, \displaystyle\sum_{T \in \mathcal{T}}\displaystyle\int_T R_{u,T}(u^m, p^m),\, w_{\tilde{T}} + \displaystyle\sum_{E \in \mathcal{E}}\displaystyle\int_E R_{u,E}(u^m, p^m), w_{\tilde{T}} 
+\end{align}
+Since the support of $\psi_{\tilde{T}}$ is $\tilde{T}$, we get
+\begin{align}\label{biot:low_bd_00}
+\langle R^{U}(u^m, p^m), w_{\tilde{T}} \rangle  =  \displaystyle\int_T R_{u,T}(u^m, p^m), w_{\tilde{T}}
+\end{align}
+We insert the definition of $R_{u,T}$ from \eqref{biot_element_res} and observe that by adding and subtracting $u^m_h$ in $\sigma^*(u^m)$ and adding and subtracting $p_h^m$ to $p^m$, we get,
+\\
+\begin{align} \label{biot:low_bd_0a}
+\langle R^m_U(u^m, p^m),, w_{\tilde{T}} \rangle = & \,\langle \sigma^* (u^m-u^m_h), \nabla w_{\tilde{T}} \rangle  + \alpha \langle p^m -p^m_h \rangle \\
+= & \, \langle f_{h_\tau}, w_{\tilde{T}}\rangle - \langle \sigma^*(u_h^m), \nabla w_{\tilde{T}}\rangle - \alpha \langle p_h^m, \nabla \cdot w_{\tilde{T}} \notag
+\end{align}
+Applying \eqref{biot:low_bd_0a} to \eqref{biot:low_bd_00} yields,
+\\
+\begin{align} \label{biot:low_bd_001}
+\int_T \sigma^*(u^m-u^m_h) \nabla w_{\tilde{T}} + \alpha \int_T (p^m-p_h^m) \nabla \cdot w_{\tilde{T}} = & \, \int_T R^m_{uh} w_{\tilde{T}} 
+\end{align}
+\\
+Adding $\int_T (f^m_T - f_h^m) w_{\tilde{T}}$ to both sides of \eqref{biot:low_bd_001}, we now get,
+\begin{align} \label{biot:low_bd002}
+& \int_T \sigma^*(u^m-u^m_h) \nabla w_{\tilde{T}} + \alpha \int_T (p^m-p_h^m) \nabla \cdot w_{\tilde{T}} \\
+& \,+\int_K (f^m_T - f_h^m) w_{\tilde{T}} =  \int_T R^m_{uh} w_{\tilde{T}} +\int_K (f^m_T - f_h^m) w_{\tilde{T}} \notag
+\end{align}
+\\
+\\
+Recall that $R^m_{uh} = f_h^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha \nabla p_h^m$. We insert this into \eqref{biot:low_bd002}, to get
+\begin{align} \label{biot:low_bd1}
+ & \,\int_T \sigma^*(u^m-u^m_h) \nabla w_{\tilde{T}} +\alpha \int_T (p^m-p_h^m) \nabla \cdot w_{\tilde{T}} +\int_K (f^m_T - f_h^m) w_{\tilde{T}} \\
+& \, = \int_T (f_h^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha \nabla p_h^m) w_{\tilde{T}} +\int_K (f^m_T - f_h^m) w_{\tilde{T}} \notag
+\end{align}
+\\
+Combining the terms on the right-hand side of \eqref{biot:low_bd1} gives,
+\\
+\begin{align} \label{biot:low_bd2}
+& \int_T \sigma^*(u^m-u^m_h) \nabla w_{\tilde{T}} + \alpha \int_T (p^m-p_h^m) \nabla \cdot w_{\tilde{T}} \\
+& \, +\int_K (f^m_T - f_h^m) w_{\tilde{T}} = \int_T (f_T^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha \nabla p_h^m) w_{\tilde{T}}  \notag
+\end{align}
+\\
+We insert the test function on the right-hand side of \eqref{biot:low_bd2},
+\\
+\begin{align} \label{biot:low_bd3}
+& \int_T \sigma^*(u^m-u^m_h) \nabla w_{\tilde{T}} + \alpha \int_T (p^m-p_h^m) \nabla \cdot w_{\tilde{T}} \\
+& \,+\int_K (f^m_T - f_h^m) w_{\tilde{T}} = \int_T (f_T^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha \nabla p_h^m)^2 \psi_{\tilde{T}} \notag
+\end{align}
+\\
+Now, we look at the terms in \eqref{biot:low_bd3} one by one, starting from the left. We let $\tilde{T} = T$ for simplicity since the choice of $\tilde{T}$ was arbitrary. Using Cauchy-Schwartz and the inverse estimate for bubble functions, we get,
+\begin{align} \label{biot:low_bd03}
+\int_T \sigma^{\ast}(u^m-u^m_h) \nabla w_T \leq & \, \| \sigma^{\ast}(u^m-u^m_h)\|_T\| \nabla w_T \|_T \\
+\leq & \, \| \sigma^{\ast}(u^m-u^m_h)\|_T c_{I2}h_T^{-1} \|R^m_{uh}\|_T \notag\\
+\alpha \int_T (p^m-p_h^m) \nabla \cdot w_{\tilde{T}} \leq & \, \alpha\| p^m-p_h^m\|_T\| \nabla w_T \|_T \\
+\leq & \, \alpha\| p^m-p_h^m\|_T\| c_{I2} h_T^{-1} \|R^m_{uh}\|_T \notag\\
+\int_T (f^m_T - f_h^m) w_{\tilde{T}} \leq & \, \| f^m_T-f^m_h\|_T \|w_T\|_T \\
+\leq & \, \| f^m_T-f^m_h\|_T \|f^m_T + \nabla \cdot \sigma^{\ast}(u^m_h) - \alpha \nabla p^m_h\|_T \notag
+\end{align}
+The term on the right-hand side has a lower bound,
+\begin{align}\label{biot:low_bd04}
+\displaystyle\int_T (f_T^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha \nabla p_h^m)^2 \psi_T \, \geq \, c_{I1}^2 \|f_T^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha \nabla p_h^m \|_T^2
+\end{align}
+\\
+Applying \eqref{biot:low_bd03} and \eqref{biot:low_bd04} on \eqref{biot:low_bd3}, we then get a lower bound for every element $T$,
+\\
+\begin{align} \label{biot:element_low_bd}
+h_T\|f_T^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha \nabla p_h^m \|_T \leq & c_{I1}^{-2} (c_{I2}\|\sigma^{\ast}(u^m-u^m_h) \|_T \\
+& \, + \alpha \, c_{I2}\| p^m-p_h^m\|_T \notag \\
+& \, + h_T\| f^m_T-f^m_h\|_T) \notag
+\end{align}
+%%%%%%%%%%%%%%%%%%%% LOWER BOUND EDGES %%%%%%%%%%%%%%%%%%%%
+\\
+\\
+Using the same methods as in \ref{section:poisson_lower bound} (more specifically equations \eqref{eq:lowbdedge1}-\eqref{eq:low_bd_edge17}), we also find the lower bound on the edges for $R_u$. We fix an arbitrary edge or face $\tilde{E} \in \mathcal{E}_\Omega$ and insert $w_{\tilde{E}} = J^m_{uh}\psi_{\tilde{E}}$ into \eqref{eq:gen_res} for $R_u$.
+\begin{align} \label{biot:lowbdedge1}
+\langle R^m_U, w_{\tilde{E}} \rangle = & \, \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \int_T R^m_{uh}\, w_{\tilde{E}}  + \sum_{E \in \mathcal{E}_\Omega} \int_E J^m_{uh} \, w_{\tilde{E}} 
+\end{align}
+Using \eqref{biot:low_bd_0a} and \eqref{biot:low_bd_001} on \eqref{biot:lowbdedge1} we have,
+\begin{align}\label{biot:lowbdedge2}
+\int_E \sigma^{\ast}(u^m-u^m_h) \nabla w_{\tilde{E}} + \alpha \int_E (p^m-p_h^m) \nabla \cdot w_{\tilde{E}} = & \, \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \int_T R^m_{uh}\, w_{\tilde{E}}  \\
+& + \sum_{E \in \mathcal{E}_\Omega} \int_E (J^m_{uh})^2 \psi_{\tilde{E}} \notag
+\end{align}
+Rearranging and using the support of $\psi_{\tilde{E}}$ on \eqref{biot:lowbdedge2}, we now get
+\begin{align}\label{biot:lowbdedge20a}
+\int_E (J^m_{uh})^2 \psi_{\tilde{E}} = & \, \int_{\omega_E} \sigma^{\ast}(u^m-u^m_h) \nabla w_{\tilde{E}} + \alpha \int_T (p^m-p_h^m) \nabla \cdot w_{\tilde{E}} \\
+& - \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \int_T R^m_{uh}\, w_{\tilde{E}} \notag \\
+= & \, \int_{\omega_E} \sigma^{\ast}(u-u_h) \nabla w_{\tilde{E}} + \alpha \int_E (p^m-p_h^m) \nabla \cdot w_{\tilde{E}} \notag \\
+& - \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}}( \int_T (f^m_T + \nabla \cdot \sigma^{\ast}(u^m_h) - \alpha \nabla p^m_h) w_{\tilde{E}} \notag \\
+& \quad + \int_T (f^m_h -f^m_T)w_{\tilde{E}}) \notag
+\end{align}
+\\
+Note that we have added and subtracted the term $f_T^m$ on the right-hand side of \eqref{biot:lowbdedge20a}. Let $\tilde{E} = E$. Inspecting the term on the left-hand side, we use the inverse estimate for a face (or edge) bubble function to get,
+\begin{align}
+\int_E (J^m_{uh})^2 \psi_{\tilde{E}} \geq c_{I3}^2 \| J^m_{uh}\|_E^2
+\end{align}
+Next, the four terms on the right-hand side yields,
+\begin{align}  \label{biot:lowbdedge03a}
+\int_{\omega_E} \sigma^{\ast}(u^m-u^m_h) \nabla w_{\tilde{E}} \leq  \| \sigma^{\ast}(u^m-u^m_h) \|_{H^1(\omega_E)} c_{I4}h_E^{-\frac{1}{2}} \|J^m_{uh}\|_E 
+\end{align}
+and, 
+\begin{align}  \label{biot:lowbdedge03b}
+\alpha \int_E (p^m-p_h^m) \nabla \cdot w_{\tilde{E}} \leq \alpha \| p^m-p_h^m \|_{H^1(\omega_E)} c_{I4}h_E^{-\frac{1}{2}} \|J^m_{uh}\|_E 
+\end{align}
+and, 
+\begin{align} \label{biot:lowbdedge03c}
+\sum_{\substack{T \in \mathcal{T} \\E \in \mathcal{E}_\Omega}} \int_T (f^m_T + \nabla \cdot \sigma^{\ast}(u^m_h) - \alpha \nabla p^m_h) w_{\tilde{E}} \leq \\ \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} & c_{I5}h_E^{\frac{1}{2}} \|J^m_{uh}\|_E \\
+& \cdot \|f^m_T + \nabla \cdot \sigma^{\ast}(u^m_h) - \alpha \nabla p^m_h\|_T  \notag
+\end{align}
+and,
+\begin{align} \label{biot:lowbdedge03d}
+\sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \int_T (f^m_h-f^m_T)w_{\tilde{E}} & \leq \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} \|f^m_h-f^m_T\|_T c_{I5} h_E^{\frac{1}{2}} \|J^m_{uh}\|_E
+\end{align}
+Now, combining \eqref{biot:lowbdedge03a}, \eqref{biot:lowbdedge03b}, \eqref{biot:lowbdedge03c} and \eqref{biot:lowbdedge03d} we get,
+\begin{align} \label{biot:edge_low_bd}
+h_E^{\frac{1}{2}} c_{I3}^2 \|J^m_{u_h}\|_E \leq & \, c_{I4} \| \sigma^{\ast}(u^m-u^m_h) \|_{H^1(\omega_E)} \\
+& +  \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} h_E (\|f^m_T + \nabla \cdot \sigma^{\ast}(u^m_h) - \alpha \nabla p^m_h\|_T \notag \\
+& \hspace{1cm} + \|f^m_h-f^m_T\|_T) \notag
+\end{align}
+As we did with Poisson, we now combine the lower bounds for the elements and the edges. We add  \eqref{biot:element_low_bd} and \eqref{biot:edge_low_bd} and use the same methods as in \eqref{eq:low_bd_edge}-\eqref{eq:low_bd_edge18}. This gives the following lower bound on the norm of the error, 
+\begin{align}
+h_T^2 \| R_{uh}^m\|_T^2 + h_E\| J_{uh}^m\|_E^2 \leq c_* \sum_{T' \in \mathcal{T}} & \, \bigl\{ \| \sigma^{\ast}(u^m-u^m_h) \|^2_{H^1(\omega_{T'})} \\
+& \, + \| p^m-p_h^m\|^2_{T'} \notag \\
+& \, + h^2_{T'}\| f^m_{T'}-f^m_h\|^2_{T'}\bigr\} \notag
+\end{align}
+\\
+The same methods apply to the second equation, \eqref{biot:bilineaR_p}, hence the results for this will be presented in the summary for the Biot model, see section \ref{biot:res_err}. 
+
+\subsubsection{Evaluation of error estimators}
+Before we proceed to the summary for this section, we will need to investigate the optimality of the space and time error estimators, as they need to yield both upper and lower bounds on the error. We observe that the estimators $\mathcal{E}_{\textnormal{spc}}$ and $\mathcal{E}_{\textnormal{tim}}$ have already been proven to provide upper bounds on the error (see \eqref{biot_final_up_bd}). However, similarly to the preliminary error estimator we derived for the Poisson model, it does not provide a lower bound on the error. Before we get to this, we need to define the space error indicators for the Biot model. 
+\subsubsection{Space error indicators}
+We define the space error indicators in the following way: for every element $T \in \mathcal{T}_h$ and for all $m \in \{0,...,N\}$,
+\begin{align} \label{biot:prelim_error_res}
+\eta^m_u = & \,\sum_{T \in \mathcal{T}_h} h_T^2 \|R^m_{uh}\|_T^2 + \sum_{E \in \mathcal{E}_\Omega} h_E \|J^m_{uh}\|_E^2 \\
+\eta^m_{p,\beta} = & \, \sum_{T \in \mathcal{T}_h} h_T^{2\beta} [h_T^2 \|R^m_{ph}\|_T^2  + \sum_{E \in \mathcal{E}_\Omega} h_E \|J^m_{ph}\|_E^2 ]
+\end{align}
+and a time-incremental version of \eqref{biot:prelim_error_res}, which are defined for all $m \in \{1,...,N\}$,
+\begin{align} \label{biot:prelim_error_res_time}
+\eta^m_u(\delta_t) = & \,\sum_{T \in \mathcal{T}_h} \tau_m^2 [ h_T^2 \|\delta_t R^m_{uh}\|_T^2 + \sum_{E \in \mathcal{E}_\Omega} h_E \|\delta_t J^m_{uh}\|_E^2 ] \\ 
+\eta^m_{p,\beta}(\delta_t) = & \, \sum_{T \in \mathcal{T}_h} h_T^{2\beta} \tau_m^2 [h_T^2 \|\delta_t R^m_{ph}\|_T^2  + \sum_{E \in \mathcal{E}_\Omega} h_E \|\delta_t J^m_{ph}\|_E^2 ] \label{biot:prelim_error_res_time2}
+\end{align}
+where $\delta_t R^m_{uh} = (R_{uh}^m - R_{uh}^{m-1})/\tau_m$ and $\delta_t J^m_{uh} = (J_{uh}^m - J_{uh}^{m-1})/\tau_m$ (resp. for $\delta_t R^m_{ph}$ and $\delta_t J^m_{ph}$). Note that the parameter $\beta \geq 0$ is needed as we are dealing with time-derivatives in the second equation.
+\\
+\\
+\\
+We want to use \eqref{biot:prelim_error_res}-\eqref{biot:prelim_error_res_time2} to evaluate the space error estimator $\mathcal{E}_{\textnormal{spc}}$. Investigating each term in $\mathcal{E}_{\textnormal{spc}}$ yields, 
+\begin{align}
+\mathcal{E}_{\textnormal{spc}} \leq c_1 \sup_{m \in [1,N]} \eta^m_u  + c_2 \sum_{m=1}^N \tau_m \eta^m_{p,0} + c_3\sum_{m=1}^N (\eta^m_u(\delta_t))
+\end{align}
+This follows from the arguments presented for the Poisson problem, see equations \eqref{poisson:eta_2}-\eqref{eq:low_bd_edge17}. Following the defintion of the time estimator $\mathcal{E}_{\textnormal{tim}}$, we have,
+\begin{equation}
+\mathcal{E}_{\textnormal{tim}} \leq c_4 \sum_{m=1}^N \tau_m \|p^m_h - p^{m-1}_h\|_d^2
+\end{equation}
+We are now ready to summarize the results from this section.
+\subsubsection{Residual a posteriori error estimate} \label{biot:res_err}
+We define the a posteriori error estimate for the Biot model for all $n \in \{1,...,N\}$,
+\begin{equation} \label{biot_e_upper_bd}
+e^n \leq c_1\sup_{m \in [1,N]} \eta^m_u + c_2 \sum_{m=1}^N \tau_m \eta^m_{p,0} + c_3\sum_{m=1}^N \eta^m_u(\delta_t)+ c_4\sum_{m=1}^N \tau_m \|p^m_h - p^{m-1}_h\|_d^2
+\end{equation}
+where the error $e^n$ is defined as,
+\begin{align}
+e^n = \tfrac{1}{2}\|u^n - u^n_{h_\tau} \|^2_a + \tfrac{1}{2}\|p^n - p^n_{h_\tau} \|^2_c
++ \tfrac{1}{4}\int_0^{t_n} \|(p - p_{h_\tau})(s) \|^2_d \, ds \\
++ \tfrac{1}{2}\int_0^{t_n} \|(p - \pi^0p_{h_\tau})(s) \|^2_d \, ds \notag
+\end{align}
+The error estimators $\eta_u$ and $\eta_p$ creates a bound from above and below for the error $e^n$ considering time and space (not including the data), where we have for every element $T \in \mathcal{T}_h$ and for all $m \in \{1,...,N\}$,
+\begin{align}
+\eta^m_u = & \,\bigl\{\sum_{T \in \mathcal{T}_h} h_T^2 \|R^m_{uh}\|_T^2 + \sum_{E \in \mathcal{E}_\Omega} h_E \|J^m_{uh}\|_E^2 \bigr\}^{\frac{1}{2}} \\
+\eta^m_{p,\beta} = & \, \bigl\{\sum_{T \in \mathcal{T}_h} h_T^{2\beta} h_T^2 \|R^m_{ph}\|_T^2  + \sum_{E \in \mathcal{E}_\Omega} h_E \|J^m_{ph}\|_E^2 \bigr\}^{\frac{1}{2}}
+\end{align}
+and for all $m \in \{1,...,N\}$,
+\begin{align}
+\eta^m_u(\delta_t) = & \, \tau_m^2 \bigl\{\sum_{T \in \mathcal{T}_h} h_T^2 \|\delta_t R^m_{uh}\|_T^2 + \sum_{E \in \mathcal{E}_\Omega} h_E \|\delta_t J^m_{uh}\|_E^2 \bigr\}^{\frac{1}{2}} \\
+\eta^m_{p,\beta}(\delta_t) = & \, \bigl\{\sum_{T \in \mathcal{T}_h} \tau_m^2 h_T^{2\beta} h_T^2 \|\delta_t R^m_{ph}\|_T^2  + \sum_{E \in \mathcal{E}_\Omega} h_E \|\delta_t J^m_{ph}\|_E^2 \bigr\}^{\frac{1}{2}}
+\end{align}
+\\
+\\
+The error is bounded from below with constants $c_5$, $c_6$ such that for all $T \in \mathcal{T}$,
+\begin{align}
+\eta^m_u \leq & \, c_5\sum_{T' \in \mathcal{T}_h} \|u^m-u^m_h \|^2_{H^1(\omega_{T'})} + \|p^m-p^m_h \|^2_{H^1(\omega_{T'})} + h_{T'}^2 \|f^m_h-f^m_{T'}\|^2_{H^1(T')} \\
+\eta^m_{p,\beta} \leq & \, c_6 \sum_{T' \in \mathcal{T}_h} \|p^m-p^{m-1} + p_h^m-p_h^{m-1} \|^2_{H^1(\omega_{T'})} \notag\\
+& \, + \|u^m-u^{m-1} + u_h^m-u_h^{m-1} \|^2_{H^1(\omega_{T'})} \notag\\
+& \, + \int_{I_m} h_{T}^2 \|(g-\pi^0g_{h_\tau})(s)\|^2_{H^1(T')} ds + \int_{I_m} \|(p-\pi^0p_{h_\tau})(s)\|^2_{H^1(T')} ds \notag
+\end{align}
+\begin{remark}
+The constants $c_i$, $i=1,..,6$ will depend on the shape parameters as as well as the stiffness tensor. 
+\end{remark}
+\begin{remark}
+The a posteriori error estimates will depend on the model parameters. That is, $\eta^m_u$ and $\eta^m_u(\delta_t)$ will depend on the size of $\alpha$ and the Lamé parameters $\mu$ and $\lambda$.  $\eta^m_{p,0}$ will depend on the size of $c$, $\alpha$ and $K$. The time estimator $ \|p^m_{h} - p^{m-1}_{h}\|_d^2$ depends on the numerical solutions of $p$ which in turn depends on $c, \alpha$ and $K$.
+\end{remark}
+\begin{remark}
+The error terms in $e^n$ are squared. Using Young's inequality on the upper bound \eqref{biot_e_upper_bd} yields the upper bound that is used for the numerical implementation in chapter \ref{chap:experiments} with $\sqrt{e}=E$, i.e.,
+\begin{align*}
+E^n \leq \underbrace{\sup_{m \in [1,N]} (\eta^m_u}_{\eta_1})^\frac{1}{2}  +  \underbrace{(\sum_{m=1}^N \tau_m \eta^m_{p,0})^\frac{1}{2}}_{\eta_2} + \underbrace{\sum_{m=1}^N (\eta^m_u(\delta_t))^\frac{1}{2}}_{\eta_3} + \underbrace{(\sum_{m=1}^N \tau_m \| p_h^m - p_h^{m-1}\|^2_d)^\frac{1}{2}}_{\eta_4}
+\end{align*}
+\end{remark}
+
+\subsubsection{Expected convergence rates}
+We have constructed error estimators associated with space and time as well as data oscillation. In accordance with \cite{meunier}, we will focus on the space and time error estimates. Recall that $\eta_1$, $\eta_2$ and $\eta_3$ are associated with the space error estimator, while $\eta_4$ is associated with the time error estimator. We will now inspect each $\eta$ to evaluate how it should converge based on the mathematical theory. 
+\\
+\\
+Under space refinement, we will in general expect to observe, 
+\begin{equation*}
+\eta_1, \eta_2, \eta_3 \rightarrow \mathcal{O}(h^k)
+\end{equation*}
+for $\mathcal{P}^k \subseteq V$. Since we are approximating $u$ and $p$ using Taylor-Hood elements, we will consequently expect to see,
+\begin{equation*}
+\eta_1, \eta_3 \rightarrow \mathcal{O}(h^2), \hspace{1cm} \eta_2 \rightarrow \mathcal{O}(h)
+\end{equation*}
+since $\eta_1$ and $\eta_3$ is based on the displacement $u$ and $\eta_2$ is based on the pressure $p$. 
+\begin{remark}
+Since $\eta_3$ is really a time-incremental version of $\eta_1$ we will be able to use this estimator to predict how the time affects the residual for the displacement under space refinement. 
+\end{remark}
+\mbox{}\\
+Under time refinement we expect for $\mathcal{P}^k \subseteq V$,
+\begin{equation*}
+\eta_4 \rightarrow \mathcal{O}(h^k)
+\end{equation*}
+We will thus expect to see these rates in our numerical experiments, see section \ref{section:num_exp_mpet1}. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%% BB MODEL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Two-network poroelasticity} \label{section:error_bb}
+This section will derive the a posteriori error estimators for the MPET model with two networks, also known as the Barenblatt-Biot model. We extend the techniques described in \cite{meunier} and derive residual-based a posteriori error estimates for the quasi-static Barenblatt-Biot model. To build upon the existing derivations, we first assume non-interacting fluid networks for the Barenblatt-Biot model, which yields similar derivations as the one for the Biot model. Following this, we do build upon the analysis to yield a posteriori error estimators with interacting fluid networks with some given transfer term. However, before we get to that, we first outline the general framework needed to construct the error estimates. The following derivation depends on the existence of a solution for the model, which has been proven in \cite{nordbotten}. 
+\\
+\\
+As we did with the Biot model, we start by rewriting the discrete problem so 
+that it holds a.e. in $(0,T)$. We henceforth assume $u_{h_\tau}, p_{1h_\tau}$ and $p_{2h_\tau}$ to be continuous affine functions in time such that $u_{h_\tau}(t_n) = u_h^n$ ($p_{1h_\tau}(t_n) = p^n_{1h}$, respectively for $p_{2h_\tau}$) for all $n \in \{0,..,N\}$. Furthermore, we assume that $\partial_t u_{h_\tau}$, $\partial_t p_{1h_\tau}$ and $\partial_t p_{2h_\tau}$ are defined a.e. in $(0,T)$. We let $f_{h_\tau}$ be a continuous piecewise affine function in time such that $f_{h_\tau}(t_n) = f_h^n$ for all $n \in \{0,..,N\}$. We also assume $\pi^0p_{1h_\tau}$ and $\pi^0g_{1h_\tau}$ to be piecewise constant functions in time equal to $p_{1h}^n$ and $g_{1h}^n$ respectively, on each interval $I_n = (t_{n-1}, t_n)$ for all $n \in \{1,..,N\}$ (same for $\pi^0p_{2h_\tau}$ and $\pi^0g_{2h_\tau}$). 
+\\ 
+\\
+We use the bilinear form \ref{bilinear} from chapter \ref{chap:discretization} to get a new discrete scheme that holds a.e. in $(0,T)$, 
+\begin{align} \label{bb:bilinear_1}
+a(u_{h_\tau}, v_h)-b_1(v_h, p_{1h_\tau}) - b_2(v_h, p_{2h_\tau}) = \langle f_{h_\tau}, v_h \rangle \\
+c_1(\partial_t p_{1h_\tau}, q_{1h}) + b_1(\partial_t u_{h_\tau}, q_{1h}) + d_1(\pi^0p_{1h_\tau}, q_{1h}) \\+ \langle S_1(\pi^0p_{1h_\tau}), q_{1h}\rangle = \langle \pi^0g_{1h_\tau}, q_{1h} \rangle  \notag\\
+c_2(\partial_t p_{2h_\tau}, q_{2h}) + b_2(\partial_t u_{h_\tau}, q_{2h}) 
++ d_2(\pi^0p_{2h_\tau}, q_{2h}) \label{bb:bilinear_2} \\
++ \langle S_2(\pi^0p_{2h_\tau}), q_{2h}\rangle = \langle \pi^0g_{2h_\tau}, q_{2h} \rangle \label{bb:bilinear_2} \notag
+\end{align}
+for all $v_h \in \hat{V}_h$, $q_{1h} \in \hat{Q}_h $ and $q_{2h} \in \hat{Q}_h$.
+\\
+\\
+Note that the transfer term is defined as in \eqref{S_a}. Naturally, when no transfer occurs this term is disregarded. 
+\\
+\\
+Next, we define the residuals where every $v \in V$ and $q_1, q_2 \in Q$ satisfies,
+\begin{align}
+\langle R_u, v\rangle := & \langle f_{h_\tau}, v\rangle - a(u_{h_\tau}, v) + b_1(v, p_{1h_\tau}) + b_2(v, p_{2h_\tau}) \\
+\langle R_{p_1}, q_1\rangle := & \langle \pi^0g_{1h_\tau}, q_1 \rangle - c_1(\partial_t p_{1h_\tau}, q_1) - b_1(\partial_t u_{h_\tau}, q_1)  \\
+& \, - d_1(\pi^0p_{1h_\tau}, q_1) - \langle S_1(\pi^0p_{1h_\tau}), q_1 \rangle \notag\\
+\langle R_{p_2}, q_2\rangle := & \langle \pi^0g_{2h_\tau}, q_2 \rangle - c_2(\partial_t p_{2h_\tau}, q_2) - b_2(\partial_t u_{h_\tau}, q_2) \\
+& \, - d_2(\pi^0p_{2h_\tau}, q_2) - \langle S_2(\pi^0p_{2h_\tau}), q_2\rangle \notag
+\end{align}
+%\\
+%As we have seen in previous sections, it is practical to rewrite the residuals using the Galerkin orthogonality (see \eqref{eq:poisson_res_rewritten}) such that we have, 
+%\begin{align*}
+%\langle R_u, v\rangle =  & \, \langle \sigma^*(u-u_h), \nabla v\rangle + \alpha_1 \langle p_1, \nabla \cdot v \rangle + \alpha_2 \langle p_2, \nabla \cdot v \rangle \quad \forall v \in V \\
+%\langle R_{P_1}, q_1\rangle = & \, c_1 \langle \partial_t(p_1-p_{1h_\tau}), q_1\rangle + K_1 \langle \nabla (p_1-p_{1h_\tau}), \nabla q_1 \rangle + \langle p_1 - \pi^0p_{1h_\tau}, q_1 \rangle \quad \forall q_1 \in Q \\
+%\langle R_{P_2}, q_2\rangle = & \, c_2 \langle \partial_t(p_2-p_{2h_\tau}), q_2\rangle + K_2 \langle \nabla (p_2-p_{2h_\tau}), \nabla q_2 \rangle + \langle p_2 - \pi^0p_{2h_\tau}, q_1 \rangle \quad \forall q_2 \in Q
+%\end{align*}
+%\\
+\subsubsection{Element and edge residuals}
+In the above framework, we define the element residual and edge residuals for $R_u$ and $R_{p_a}$, $a=1,2$. Let $R_{u,T}$ and $R_{p_a,T}$ denote the element residuals of $R_u$ and $R_{p_a}$, respectively. Also let $R_{u,E}$ and $R_{p_a,E}$ denote the respective edge residuals of $R_u$ and $R_{p_a}$, $a=1,2$. We then have for all $m\in\{0,...,N\}$,
+\begin{align} \label{bb_u_element_edge_res}
+R_{u,T}(u^m_h,p^m_h) = & \, f_h^m + \nabla \cdot \sigma^{\ast}(u_h^m) + \sum{a=1}^2 -\alpha_a \nabla p_{ah}^m  \quad  T \in \mathcal{T}_h\\ 
+R_{u,E}(u^m_h,p^m_h)  = & \, \begin{cases} 
+	\sum{a=1}^2 \alpha_a \, \mathbb{J}_E(\mathbf{n}_E \cdot p_{ah}^m) - \mathbb{J}_E(\mathbf{n}_E \cdot \sigma^{\ast}(u_h^m)) & \,  E \in \mathcal{E}_\Omega \\
+     0 & \, E \in \mathcal{E}_{\Gamma_D} \\
+\end{cases}
+\end{align} 
+and,
+\begin{align} \label{bb_p_element_edge_res}
+R_{p_1,T}(u^m_h,p^m_h)  = & \, g^m_{1h}  - \xi\tilde{p}_{1h}^m - c_1\partial_t p^m_{1h} - \alpha_1 \nabla \cdot \partial_t u_h^m + K_1 \Delta p_{1h}^m \quad  T \in \mathcal{T}_h\\ 
+R_{p_1,E}(u^m_h,p^m_h)  = & \, \begin{cases} 
+	- K_1 \mathbb{J}_E(\mathbf{n}_E \cdot \nabla p_{1h}^m)  & \hspace{2.5cm} E \in \mathcal{E}_\Omega \\
+     0 & \hspace{2.5cm} E \in \mathcal{E}_{\Gamma_D} \\
+\end{cases}
+\end{align}
+and,
+\begin{align} \label{bb_p_element_edge_res}
+R_{p_2,T}(u^m_h,p^m_h)  = & \, g^m_{2h}  - \xi\tilde{p}_{2h}^m - c_2\partial_t p^m_{2h} - \alpha_2 \nabla \cdot \partial_t u_h^m + K_2 \Delta p_{2h}^m \quad  T \in \mathcal{T}_h\\ 
+R_{p_2,E}(u^m_h,p^m_h)  = & \, \begin{cases} 
+	- K_2 \mathbb{J}_E(\mathbf{n}_E \cdot \nabla p_{2h}^m)  & \hspace{2.5cm}  E \in \mathcal{E}_\Omega \\
+     0 & \hspace{2.5cm} E \in \mathcal{E}_{\Gamma_D} \\
+\end{cases}
+\end{align}
+where we let $\tilde{p}_{1h}^m=p_{1h}^m-p_{2h}^m$ and $\tilde{p}_{2h}^m=p_{2h}^m-p_{1h}^m$ (this follows from the definition of the transfer term). We observe that $\tilde{p}_{1h}^m=-\tilde{p}_{2h}^m$.
+\\
+\\
+To alleviate the notation, we do as in the previous section and let $R_{u,T}(u^m_h,p^m_h)$ be denoted as $R^m_{uh}$ and $R_{u,E}(u^m_h,p^m_h)$ as $J^m_{uh}$. Similarly, let $R_{p_i,T}(u^m_h,p^m_h)$ be denoted as $R^m_{pih}$ and $R_{p_i,E}(u^m_h,p^m_h)$ as $J^m_{pih}$ for $i=1,2$. Note that we have renamed the transfer coefficients, i.e. $\xi_{2\to 1} = \xi_{1\to 2} = \xi$ for simplicity.
+\\
+\\
+As we stated at the start of the section, the a posteriori error estimators will first be derived under the assumption that there exists no transfer between the two networks, i.e. $\xi = 0$. The derivation for these estimators are very similar to the estimators obtained for the Biot model, and we will thus refer to the analysis done in that section. 
+\subsubsection{Case 1: Non-interacting fluid networks} \label{bb:case1_res_err}
+Assuming non-interacting fluid networks; $\xi = 0$ will result in the same system as for the single network case, except for an additional equation for the second pressure. This derivation will in other words not differ significantly from the one done for the Biot model. In the following sections, we will present the upper and lower bounds on the norm of the error for \eqref{bb:bilinear_1}-\eqref{bb:bilinear_2} with $S_1=S_2=0$. Finally, we will conclude with the a posteriori error estimator for the non-interacting 2-networks case. Note that this outline is presented without any additional analysis.
+\paragraph{Upper bound}\mbox{}\\
+Using the same procedure as in \eqref{biot:up_bd1}-\eqref{biot_final_up_bd} we get the following upper bound on the norm of the error, where we define the error $e^n$ for all $n \in \{1,...,N\}$,
+\begin{align}
+e^n = & \tfrac{1}{2}\|u^n - u^n_{h_\tau} \|^2_a + \tfrac{1}{2}\|p_1^n - p^n_{1h_\tau} \|^2_c + \tfrac{1}{2}\|p_2^n - p^n_{2h_\tau} \|^2_c \\
+& + \tfrac{1}{4}\int_0^{t_n} \|(p_1 - p_{1h_\tau})(s) \|^2_d \, ds \notag\\
+& + \tfrac{1}{4}\int_0^{t_n} \|(p_2 - p_{2h_\tau})(s) \|^2_d \, ds \notag\\
+& + \tfrac{1}{2}\int_0^{t_n} \|(p_1 - \pi^0p_{1h_\tau})(s) \|^2_d \, ds \notag\\
+& + \tfrac{1}{2}\int_0^{t_n} \|(p_2 - \pi^0p_{2h_\tau})(s) \|^2_d \, ds \notag
+\end{align}
+The error is bounded by data, space and time estimator for all $n \in \{1,...,N\}$,
+\begin{equation}
+e^n \leq \mathcal{E}_{\textnormal{dat}} + \mathcal{E}_{\textnormal{spc}} + \mathcal{E}_{\textnormal{tim}} 
+\end{equation}
+where the estimators are defined as,
+\begin{align} \label{bb:est_tim}
+\mathcal{E}_{\textnormal{tim}} = & \,\sum_{m=1}^N \frac{1}{3}\tau_m (\|p^m_{1_h} - p^{m-1}_{1_h}\|_d^2 + |p^m_{2_h} - p^{m-1}_{2_h}\|_d^2) \\
+\mathcal{E}(f,g) = & \, \int_0^{T}  \|(g-\pi^0 g_{h_\tau})(s)\|^2_{d'} \, ds  \\
+& + \biggl( 2 \sup_{s \in [0,T]} \| (f - f_{h_\tau})(s)\|_a + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds \biggr)^2 \notag\\
+\mathcal{E}_{\textnormal{dat}} = & \, \|u_0 - u_{0 h} \|^2_a + \|p_{1_0} - p_{1_{0 h}} \|^2_c \label{bb:est_dat}\\
+& \, + \|p_{2_0} - p_{2_{0 h}} \|^2_c + 4\mathcal{E}(f, g_1 + g_2) \notag\\
+\mathcal{E}_{\textnormal{spc}} = & \, 4 \tau_m\sum_{m=1}^N ( \| R_{P_1}^m\|^2_{d'} + \| R_{P_2}^m\|^2_{d'}) \, ds  \label{bb:est_spc}\\
+&+ 4\biggl(2 \sup_{0 \leq m \leq N} \| R_u^m\|_a\| + \sum_{m=1}^N \| R_u^m - R_u^{m-1}\|_a \biggr)^2 \notag
+\end{align}
+Note that we may bound $\mathcal{E}(f,g_1+g_2)$ using the triangle inequality. We then get,
+\begin{align*}
+\mathcal{E}(f,g_1 + g_2) = & \, \int_0^{T}  \|((g_1+g_2)-\pi^0 (g_{1h_\tau}+g_{2h_\tau}))(s)\|^2_{d'} \, ds \\
+& + \biggl( 2 \sup_{s \in [0,T]} \| (f - f_{h_\tau})(s)\|_a + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds \biggr)^2 \\
+\leq & \, \int_0^{T} \biggl( \|(g_1-\pi^0g_{1h_\tau})(s)\|_{d'} + \|(g_2-\pi^0 g_{2h_\tau})(s)\|_{d'} \biggr)^2 \, ds \\
+& + \biggl( 2 \sup_{s \in [0,T]} \| (f - f_{h_\tau})(s)\|_a + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds \biggr)^2
+\end{align*}
+
+\paragraph{Lower bound}\mbox{}\\
+We refer to the analysis done for Biot, see equations \eqref{biot:low_bd1}-\eqref{biot:low_bd3} for this section. For each each element $T$, we have,
+\begin{align*} 
+h_T\|f_T^m + \nabla \cdot \sigma^{\ast}(u_h^m) - \alpha_1 \nabla p_{1_h}^m - \alpha_2 \nabla p_{2_h}^m \|_T \leq & \, c_{I1}^{-2} (c_{I2}\|\sigma^{\ast}(u^m-u^m_h) \|_T \\
+& + c_{I2}(\alpha_1 \| p_1^m-p_{1_h}^m\|_T  \\
+& + \alpha_2 \| p_2^m-p_{2_h}^m\|_T \\
+& + h_T\| f^m_T-f^m_h\|_T)
+\end{align*}
+and for each face/edge $E$,
+\begin{align*}
+h_E^{\frac{1}{2}} c_{I3}^2 \|J^m_{u_h}\|_E \leq & \, c_{I4} \| \sigma^{\ast}(u^m-u^m_h) \|_{H^1(\omega_E)} \\
+& +  \sum_{\substack{T \in \mathcal{T} \\ E \in \mathcal{E}_\Omega}} h_E (\|f^m_T + \nabla \cdot \sigma^{\ast}(u^m_h) - \alpha_1 \nabla p_{1_h}^m - \alpha_2 \nabla p_{2_h}^m\|_T \\
+& \quad + \|f^m_h-f^m_T\|_T)
+\end{align*}
+Combining the two lower bounds together and using the same steps done in \eqref{eq:lowbdedge10a}-\eqref{eq:low_bd_edge18}, we get the following lower bound on the norm of the error,
+\begin{align*}
+h_T^2 \| R_{uh}^m\|_T^2 + h_E\| J_{uh}^m\|_E^2 \leq & c_* \sum_{T' \in \mathcal{T}} \bigl\{ \| \sigma^*(u^m-u^m_h) \|^2_{H^1(\omega_{T'})} \\
+& \quad \quad + \| p_1^m-p^m_{1h}\|^2_{T'} + \| p_2^m-p^m_{2h}\|^2_{T'} \\
+& \quad \quad + h^2_{T'}\| f^m_{T'}-f^m_h\|^2_{T'}\bigr\}
+\end{align*}
+The same methods applies to the second equation \eqref{biot:bilineaR_p}. A summary of the results from this section follows below. 
+\paragraph{Residual a posteriori error estimate} \label{bb_case1_final_estimate}\mbox{} \\
+We define the total error $e^n$ for the Barenblatt-Biot model with non-interacting fluid networks for all $n \in \{1,...,N \}$,
+\\
+\begin{align} \label{bb:error}
+e^n = & \, \tfrac{1}{2}\|u^n - u^n_{h_\tau} \|^2_a + \tfrac{1}{2}\|p_1^n - p^n_{1h_\tau} \|^2_c + \tfrac{1}{2}\|p_2^n - p^n_{2h_\tau} \|^2_c \\
+&+ \tfrac{1}{4}\int_0^{t_n} \|(p_1 - p_{1h_\tau})(s) \|^2_d \, ds 
++ \tfrac{1}{4}\int_0^{t_n} \|(p_2 - p_{2h_\tau})(s) \|^2_d \, ds \notag\\
+& + \tfrac{1}{2}\int_0^{t_n} \|(p_1 - \pi^0p_{1h_\tau})(s) \|^2_d \, ds 
++ \tfrac{1}{2}\int_0^{t_n} \|(p_2 - \pi^0p_{2h_\tau})(s) \|^2_d \, ds \notag
+\end{align}
+We may use the following error estimator to bound the norm of the error,
+\begin{equation} \label{bb:error_up_bd}
+e^n \leq \mathcal{E}_{\textnormal{dat}} + \mathcal{E}_{\textnormal{spc}} + \mathcal{E}_{\textnormal{tim}} 
+\end{equation}
+where we defined $\mathcal{E}_{\textnormal{dat}}$, $\mathcal{E}_{\textnormal{spc}}$, $\mathcal{E}_{\textnormal{tim}}$ as in \eqref{bb:est_dat}, \eqref{bb:est_spc} and \eqref{bb:est_tim}, respectively.
+\\
+\\
+Furthermore, $\mathcal{E}_{\textnormal{spc}}$ and $\mathcal{E}_{\textnormal{tim}}$ can be bounded using the error indicators $\eta_u$ and $(\eta_{p_1}, \eta_{p_2})$. We have for every element $T \in \mathcal{T}_h$ and for all $m \in \{0,...,N\}$,
+\begin{align} \label{bb_error_indicators1}
+\eta^m_u = & \,\bigl\{\sum_{T \in \mathcal{T}_h} h_T^2 \|R^m_{uh}\|_T^2 + \sum_{E \in \mathcal{E}_\Omega} h_E \|J^m_{uh}\|_E^2 \bigr\}^{\frac{1}{2}} \\
+\eta^m_{p_1,\beta} = & \, \bigl\{\sum_{T \in \mathcal{T}_h} h_T^{2\beta} h_T^2 \|R^m_{p1h}\|_T^2  + \sum_{E \in \mathcal{E}_\Omega} h_E \|J^m_{p1h}\|_E^2 \bigr\}^{\frac{1}{2}} \label{bb_error_indicators2a}\\
+\eta^m_{p_2,\beta} = & \, \bigl\{\sum_{T \in \mathcal{T}_h} h_T^{2\beta} h_T^2 \|R^m_{p2h}\|_T^2  + \sum_{E \in \mathcal{E}_\Omega} h_E \|J^m_{p2h}\|_E^2 \bigr\}^{\frac{1}{2}} \label{bb_error_indicators2b}
+\end{align}
+and the time incremental versions of these which are defined for all $m \in \{0,...,N\}$, 
+\begin{align}
+\eta^m_u(\delta_t) = & \,\bigl\{\sum_{T \in \mathcal{T}_h} h_T^2 \|\delta_t R^m_{uh}\|_T^2 + \sum_{E \in \mathcal{E}_\Omega} h_E \|\delta_t J^m_{uh}\|_E^2 \bigr\}^{\frac{1}{2}} \\
+\eta^m_{p_1,\beta}(\delta_t) = & \, \bigl\{\sum_{T \in \mathcal{T}_h} h_T^{2\beta} h_T^2 \|\delta_t R^m_{p1h}\|_T^2  + \sum_{E \in \mathcal{E}_\Omega} h_E \|\delta_t J^m_{p1h}\|_E^2 \bigr\}^{\frac{1}{2}} \\
+\eta^m_{p_2,\beta}(\delta_t) = & \, \bigl\{\sum_{T \in \mathcal{T}_h} h_T^{2\beta} h_T^2 \|\delta_t R^m_{p2h}\|_T^2  + \sum_{E \in \mathcal{E}_\Omega} h_E \|\delta_t J^m_{p2h}\|_E^2 \bigr\}^{\frac{1}{2}}
+\end{align}
+where $\delta_t R^m_{uh} = (R_{uh}^m - R_{uh}^{m-1})/\tau_m$ and $\delta_t J^m_{uh} = (J_{uh}^m - J_{uh}^{m-1})/\tau_m$ (resp. for $\delta_t R^m_{p1h}$ and $\delta_t J^m_{p1h}$). Note that the parameter $\beta \geq 0$ is needed as we are dealing with time-derivatives in the second equation. These form an upper bound on the error where for all $n \in \{1,...,N\}$
+\begin{align}
+e^n \leq & c_1\sup_{m \in [1,N]} \eta^m_u  + c_2\sum_{m=1}^N \tau_m (\eta^m_{p_1,0} + \eta^m_{p_2,0}) + c_3\sum_{m=1}^N (\eta^m_u(\delta_t)) \\
+& + c_4\sum_{m=1}^N \tau_m (\|p^m_{1h} - p^{m-1}_{1h}\|_d^2 + \|p^m_{2h} - p^{m-1}_{2h}\|_d^2) \notag
+\end{align}
+The estimators also form a lower bound such that for all $T \in \mathcal{T}$,
+\begin{align}
+\eta^m_u \leq & \, \tilde{c}\sum_{T' \in \mathcal{T}_h} ( \|u^m-u^m_h \|^2_{H^1(\omega_{T'})} + \|p_1^m-p^m_{1h} \|^2_{H^1(\omega_{T'})} \\
+& \, + \|p_2^m-p^m_{2h} \|^2_{H^1(\omega_{T'})} + h_{T'}^2 \|f^m_h-f^m_{T'}\|^2_{H^1(T')} ) \notag 
+\notag\\ \notag\\
+\eta^m_{p_1 + p_2,\beta} \leq & \, \tilde{d} \sum_{T' \in \mathcal{T}_h} \biggl(\int_{I_m} h_{T}^2 (\|(g_1-\pi^0g_{1h_\tau})(s)\|^2_{H^1(T')} \\
+& \quad \, + \|(g_2-\pi^0g_{2h_\tau})(s)\|^2_{H^1(T')}) ds \notag \\
+& \quad \, + \|p_1^m-p_1^{m-1} + p_{1h}^m-p_{1h}^{m-1} \|^2_{H^1(\omega_{T'})} \notag\\
+& \quad \, + \|p_2^m-p_2^{m-1} + p_{2h}^m-p_{2h}^{m-1} \|^2_{H^1(\omega_{T'})} \notag\\
+& \quad \, + \|u^m-u^{m-1} + u_h^m-u_h^{m-1} \|^2_{H^1(\omega_{T'})} \biggr) \notag\\
+& \quad \, + \int_{I_m} (\|(p_1-\pi^0p_{1h_\tau})(s)\|^2_{H^1(T')} \notag\\
+& \quad \, + \|(p_2-\pi^0p_{2h_\tau})(s)\|^2_{H^1(T')} ds \notag
+\end{align}
+\begin{remark}
+The constants $c_i$, $i=1,..,6$ will depend on the shape parameters as as well as the stiffness tensor. 
+\end{remark}
+\begin{remark}
+The a posteriori error estimates will depend on the model parameters. That is, $\eta^m_u$ and $\eta^m_u(\delta_t)$ will depend on the size of $\alpha_1, \alpha_2$ and the Lamé parameters $\mu$ and $\lambda$. $\eta^m_{p_a,0}$  will depend on the size of $c_a, \alpha_a$ and $K_a$, $a=1,2$. The time estimator $ \|p^m_{1h} - p^{m-1}_{1h}\|_d^2 + \|p^m_{2h} - p^{m-1}_{2h}\|_d^2$ depends on the numerical solutions of $p_a$ which in turn depends on $c_a, \alpha_a$ and $K_a$, $a=1,2$.
+\end{remark}
+\begin{remark}
+The error terms in $e^n$ are squared. Using Young's inequality on \eqref{bb:error_up_bd} yields the upper bound that is used for the numerical implementation in chapter \ref{chap:experiments} with $\sqrt{e}=E$.
+\end{remark}
+\subsubsection{Case 2: Interacting fluid networks} 
+With interacting fluid networks, the system \eqref{bb:bilinear_1}-\eqref{bb:bilinear_2} will only differ from case 1 by the added linear functionals $S_1, S_2 \neq 0$. We will thus dedicate this section to analyzing those terms. We will follow the same outline as done in case 1, where we insert suitable test functions to get an upper bound. Following this, we will then single out the terms that differ from case 1 and ensure that these can be bounded using similar methods. The derivation for the lower bound follows similarly to the methods used for the single network case. 
+\\
+\\
+We define the data, space and time error estimators for the two network poroelasticity model,
+\begin{align} 
+\mathcal{E}(f,g) = & \, \int_0^{T}  \|(g-\pi^0 g_{h_\tau})(s)\|^2_{d'} \, ds + \biggl( 2 \sup_{s \in [0,T]} \| (f - f_{h_\tau})(s)\|_a \\
+& \, + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds \biggr)^2 \notag \\
+\mathcal{E}_{\textnormal{dat}} = & \, \|u_0 - u_{0 h} \|^2_a + \|p_{1_0} - p_{1h_0} \|^2_c + \|p_{2_0} - p_{2h_0} \|^2_c \\
+& \, + 4\mathcal{E}(f, g_1 + g_2) \notag \\
+\mathcal{E}_{\textnormal{spc}} = & \, 4 \tau_m\sum_{m=1}^N ( \| R_{P_1}^m\|^2_{d'} + \| R_{P_2}^m\|^2_{d'}) \, ds \\
+& \, + 4\biggl(2 \sup_{0 \leq m \leq N} \| R_u^m\|_a\| + \sum_{m=1}^N \| R_u^m - R_u^{m-1}\|_a \biggr)^2 \notag \\
+\mathcal{E}_{\textnormal{tim}} = & \,\sum_{m=1}^N \frac{1}{3}\tau_m (\|p^m_{1_h} - p^{m-1}_{1_h}\|_{\hat{d}}^2 + |p^m_{2_h} - p^{m-1}_{2_h}\|_{\hat{d}}^2) 
+\end{align}
+We also define the error $e^n$ for all $n \in \{1,...,N \}$,
+\begin{align} \label{mpet:total_error}
+e^n = \tfrac{1}{2}\|u^n - u^n_{h_\tau} \|^2_a + \tfrac{1}{2}\|p_1^n - p^n_{1h_\tau} \|^2_c
++ \tfrac{1}{2}\|p_2^n - p^n_{2h_\tau} \|^2_c \\ \notag
++ \tfrac{1}{4}\int_0^{t_n} \|(p_1 - p_{1h_\tau})(s) \|^2_d ds + \tfrac{1}{4}\int_0^{t_n} \|(p_2 - p_{2h_\tau})(s) \|^2_d \, ds \notag\\ 
++ \tfrac{1}{4}\int_0^{t_n} |(p_1-p_{1h_\tau})(s)|_T^2 ds\notag 
++ \tfrac{1}{4}\int_0^{t_n} |(p_2-p_{2h_\tau})(s)|_T^2 ds \notag \\ 
++ \tfrac{1}{2}\int_0^{t_n} \|(p_1 - \pi^0p_{1h_\tau})(s) \|^2_d \, ds
++ \tfrac{1}{2}\int_0^{t_n} \|(p_2 - \pi^0p_{2h_\tau})(s) \|^2_d \, ds  \notag \\
++ \tfrac{1}{2}\int_0^{t_n} |(p_1 - \pi^0p_{1h_\tau})(s) |^2_T \, ds + \tfrac{1}{2}\int_0^{t_n} |(p_2 - \pi^0p_{2h_\tau})(s) |^2_T \, ds \notag
+\end{align}
+\begin{proposition} \label{prop}
+In the above framework, for all $n \in \{1,...,N \}$,
+\begin{equation}
+e^n \leq \mathcal{E}_{\textnormal{dat}} + \mathcal{E}_{\textnormal{spc}} + \mathcal{E}_{\textnormal{tim}} 
+\end{equation}
+\end{proposition}
+\begin{proof}
+Let $\hat{u}=u-u_{h_\tau}$, $\hat{p_1}=p_1-p_{1h_\tau}$ and $\hat{p_1}^*=p_1-\pi^0p_{1h_\tau}$ (same for $p_2$). We use \eqref{bb:bilinear_1}-\eqref{bb:bilinear_2} such that a.e. in $(0,T)$,
+\begin{align}
+\langle R_u + f - f_{h_\tau}, v \rangle  = & \, a(\hat{u}, v)-b_1(v, \hat{p_1})-b_2(v, \hat{p_2}) \label{bb:up_bd1}\\
+\langle R_{p_1} + g_1 - \pi^0g_{1h_\tau}, q_1 \rangle = & \, c_1(\partial_t \hat{p_1}, q_1) + b_1(\partial_t \hat{u}, q_1) \\ 
++ & \, d_1(\hat{p_1}^*, q_1) + \langle S_1(\hat{p_1}^*), q_1 \rangle\notag \\
+\langle R_{p_2} + g_2 - \pi^0g_{2h_\tau}, q_2 \rangle = & \, c_2(\partial_t \hat{p_2}, q_2) + b_2(\partial_t \hat{u}, q_2) \label{bb:up_bd1_a}\\
++ & \, d_2(\hat{p_2}^*, q_2) + \langle S_2(\hat{p_2}^*), q_2 \rangle \notag
+\end{align}
+for all $v \in \hat{V}$ and $q_1, q_2 \in \hat{Q}$.
+\\
+\\
+Inserting test functions $v=\partial_t \hat{u}$, $q_1=\hat{p}_1$, $q_2=\hat{p}_2$ into \eqref{bb:up_bd1}-\eqref{bb:up_bd1_a} yields, 
+\begin{align} \label{bb:up_bd2}
+\langle R_u + f - f_{h_\tau}, \partial_t \hat{u} \rangle = & \, a(\hat{u}, \partial_t \hat{u}) - b_1(\partial_t \hat{u}, \hat{p}_1)- b_2(\partial_t \hat{u}, \hat{p}_2) \\ 
+\langle R_{p_1} + g_1 - \pi^0g_{1h_\tau}, \hat{p}_1 \rangle = & \, c_1(\partial_t \hat{p}_1, \hat{p}_1) + b_1(\partial_t \hat{u}, \hat{p}_1) \\
++ & \, d_1(\hat{p}^*_1, \hat{p}_1) + \langle S_1(\hat{p_1}^*), \hat{p}_1 \rangle \notag \\
+\langle R_{p_2} + g_2 - \pi^0g_{2h_\tau}, \hat{p}_2 \rangle = & \,c_2(\partial_t \hat{p}_2, \hat{p}_2) + b_2(\partial_t \hat{u}, \hat{p}_2) \label{bb:up_bd2_a}\\ 
++ & \, d_2(\hat{p}^*_2, \hat{p}_2) + \langle S_2(\hat{p_2}^*), \hat{p}_2 \rangle\notag
+\end{align}
+for all $v \in \hat{V}$, $q_1, q_2 \in \hat{Q}$.
+\\
+\\
+We now add \eqref{bb:up_bd2}-\eqref{bb:up_bd2_a} together, which gives,
+\begin{align}  \label{bb:add_forms}
+a(\hat{u}, \partial_t \hat{u}) + c_1(\partial_t \hat{p}_1, \hat{p}_1) + c_2(\partial_t \hat{p}_2, \hat{p}_2) + d_1(\hat{p}^*_1, \hat{p}_1) \\
++ \langle S_1(\hat{p_1}^*), \hat{p}_1 \rangle + d_2(\hat{p}^*_2, \hat{p}_2) + \langle S_2(\hat{p_2}^*), \hat{p}_2 \rangle
+= & \langle R_u + f - f_{h_\tau}, \partial_t \hat{u} \rangle \notag\\
+& \, + \langle R_{p_1} + g_1 - \pi^0g_{1h_\tau}, \hat{p}_1 \rangle \notag \\
+& \, + \langle R_{p_2} + g_2 - \pi^0g_{2h_\tau}, \hat{p}_2 \rangle \notag
+\end{align}
+Observe that the bilinear forms $b_1(\cdot, \cdot)$ and $b_2(\cdot, \cdot)$ cancel each other out when we add the equations together.
+\\
+\\
+Now, as we stated at the start of the section, there are two terms in the 2-network system that differs from the 1-network system. Namely the transfer terms, $S_1$ and $S_2$. Using the bilinear form of \eqref{T(p,q)} introduced in section \ref{section:num_disc_bilinear}, we may rewrite the sum of these two terms such that, 
+\begin{align}
+\langle S_1(\hat{p_1}^*), \hat{p}_1 \rangle + \langle S_2(\hat{p_2}^*), \hat{p}_2 \rangle = T((\hat{p_1}^*, \hat{p_2}^*), (\hat{p}_1, \hat{p}_2))
+\end{align}
+Since $T$ is symmetric we have, 
+\begin{align}
+T(p,q) = \tfrac{1}{2}T(p,p) + \tfrac{1}{2}T(q,q) - \tfrac{1}{2}T(p-q,p-q)
+\end{align}
+We know from section \ref{section:error_biot} that $d$ is symmetric and so, going back to the equation with all terms summed \eqref{bb:add_forms} we have,
+\begin{align}  \label{bb:add_forms}
+a(\hat{u}, \partial_t \hat{u}) + c_1(\partial_t \hat{p}_1, \hat{p}_1) + c_2(\partial_t \hat{p}^*_2, \hat{p}_2) + \tfrac{1}{2}d_1(\hat{p}_1, \hat{p}_1) \\
++ \tfrac{1}{2}d_1(\hat{p}^*_1, \hat{p}^*_1) + \tfrac{1}{2}T(\hat{p}_1, \hat{p}_1) + T(\hat{p}^*_1, \hat{p}^*_1) + \tfrac{1}{2}d_2(\hat{p}_2, \hat{p}_2) \notag\\  
+ + d_2(\hat{p}^*_2, \hat{p}^*_2) + \tfrac{1}{2}T(\hat{p}_2, \hat{p}_2) + \tfrac{1}{2}T(\hat{p}^*_2, \hat{p}^*_2)
+= & \, \langle R_u + f - f_{h_\tau}, \partial_t \hat{u} \rangle \notag\\
+& \, + \langle R_{p_1} + g_1 - \pi^0g_{1h_\tau}, \hat{p}_1 \rangle \notag \\
+& \, + \langle R_{p_2} + g_2 - \pi^0g_{2h_\tau}, \hat{p}_2 \rangle \notag \\
+& \, + \tfrac{1}{2} d_1(\hat{p}_1-\hat{p}^*_1, \hat{p}_1-\hat{p}^*_1) \notag\\
+& \, + \tfrac{1}{2} T(\hat{p}_1-\hat{p}^*_1, \hat{p}_1-\hat{p}^*_1)\notag \\
+& \, + \tfrac{1}{2} d_2(\hat{p}_2-\hat{p}^*_2, \hat{p}_2-\hat{p}^*_2) \notag \\
+& \, + \tfrac{1}{2} T(\hat{p}_2-\hat{p}^*_2, \hat{p}_2-\hat{p}^*_2) \notag 
+\end{align}
+Furthermore, since $R_{p_1} + g_1 - \pi^0g_{1h_\tau} \in Q_h$ (same applies to  $R_{p_2} + g_2 - \pi^0g_{2h_\tau}$) we have,  
+\begin{equation} \label{bb:res_P_bd}
+\langle R_{p_1} + g_1 - \pi^0g_{1h_\tau}, \hat{p}_1 \rangle_{d} 
+ \leq \| R_{p_1} + g_1 - \pi^0g_{1h_\tau} \|_{d'}  \| \hat{p}_1 \|_{d} 
+\end{equation}
+\\
+with the norm  $\|\cdot\|_{d'} = \sup_{0 \neq v \in Q} \|\langle \cdot, q \rangle_{d}\| / \|q\|_{d}$. 
+\\
+\\
+We use Young's inequality on \eqref{bb:res_P_bd} with $p=q=2$ and $\epsilon=2$ to get,
+\begin{equation}
+\langle R_{p_1} + g_1 - \pi^0g_{1h_\tau}, \hat{p}_1 \rangle_{d} \leq \| R_{p_1} + g_1 - \pi^0g_{1h_\tau} \|^2_{d'} + \tfrac{1}{4} \|\hat{p}_1 \|^2_{d}
+\end{equation}
+The equivalent applies to $R_{p_2} + g_2 - \pi^0g_{2h_\tau}$. 
+%This yields,
+%\begin{align} 
+%\tfrac{1}{2} d_t \|\hat{u}\|_a^2 + \tfrac{1}{2} d_t \|\hat{p}_1\|_c^2 + \tfrac{1}{2} d_t \|\hat{p}_2\|_c^2 + \tfrac{1}{4}\|\hat{p}_1\|_{d}^2 \\
+%+ \tfrac{1}{2}|\hat{p}_1|_{T}^2 + \tfrac{1}{4}\|\hat{p}_2\|_{d}^2 + \tfrac{1}{2}|\hat{p}_2|_{T}^2 + \tfrac{1}{2} (\|\hat{p}^*_1\|_{d}^2 + |\hat{p}^*_1|_{T}^2)\notag \\
+% + \tfrac{1}{2} (\|\hat{p}^*_2\|_{d}^2 +|\hat{p}^*_2|_{T}^2) \leq & \, \langle R_u + f - f_{h_\tau}, \partial_t \hat{u} \rangle_a  \\
+%& \, + \|R_{p_1} + g_1 - \pi^0g_{1h_\tau}\|_{d'}^2 \notag \\
+%& \, + \|R_{p_2} + g_2 - \pi^0g_{2h_\tau}\|_{d'}^2 \notag \\
+%& \, + \tfrac{1}{2} \|p_{1h_\tau} - \pi^0p_{1h_\tau}\|_{\hat{d}}^2 \notag \\
+%& \, + \tfrac{1}{2} \|p_{2h_\tau} - \pi^0p_{2h_\tau}\|_{\hat{d}}^2 \notag 
+%\end{align}
+\\
+\\
+Using the $\hat{d}$-norm notation of \eqref{d_hat_norm} introduced in section \ref{section:num_disc_bilinear}, we may now infer,
+\begin{align} \label{bb:up_bd_tmp}
+\tfrac{1}{2} d_t \|\hat{u}\|_a^2 + \tfrac{1}{2} d_t \|\hat{p}_1\|_c^2 + \tfrac{1}{2} d_t \|\hat{p}_2\|_c^2 + \tfrac{1}{4}\|\hat{p}_1\|_{\hat{d}}^2 \\
++ \tfrac{1}{4}\|\hat{p}_2\|_{\hat{d}}^2 + \tfrac{1}{2} \|\hat{p}^*_1\|_{\hat{d}}^2 + \tfrac{1}{2} \|\hat{p}^*_2\|_{\hat{d}}^2 \leq & \, \langle R_u + f - f_{h_\tau}, \partial_t \hat{u} \rangle_a \notag \\
+& \, + \|R_{p_1} + g_1 - \pi^0g_{1h_\tau}\|_{d'}^2 \notag \\
+& \, + \|R_{p_2} + g_2 - \pi^0g_{2h_\tau}\|_{d'}^2 \notag \\
+& \, + \tfrac{1}{2} \|p_{1h_\tau} - \pi^0p_{1h_\tau}\|_{\hat{d}}^2 \notag \\
+& \, + \tfrac{1}{2} \|p_{2h_\tau} - \pi^0p_{2h_\tau}\|_{\hat{d}}^2 \notag 
+\end{align}
+Integrating \eqref{bb:up_bd_tmp} by parts from $0$ to $t_n$ for all $n \in \{1,...,N \}$ yields,
+\begin{align} \label{bb:up_bd4}
+\tfrac{1}{2}\|u^n - u^n_{h_\tau} \|^2_a + \tfrac{1}{2}\|p_1^n - p^n_{1h_\tau} \|^2_c
++ \tfrac{1}{2}\|p_2^n - p^n_{2h_\tau} \|^2_c \\ 
++ \tfrac{1}{4}\int_0^{t_n} \|(p_1 - p_{1h_\tau})(s) \|^2_d ds + \tfrac{1}{4}\int_0^{t_n} \|(p_2 - p_{2h_\tau})(s) \|^2_{\hat{d}} \, ds \notag \\
++ \tfrac{1}{2}\int_0^{t_n} \|(p_1 - \pi^0p_{1h_\tau})(s) \|^2_{\hat{d}} \, ds \notag \\
++ \tfrac{1}{2}\int_0^{t_n} \|(p_2 - \pi^0p_{2h_\tau})(s) \|^2_{\hat{d}} \leq A\sigma(u) + B^2 \notag
+\end{align}
+where we define $A$, $B^2$ and $\sigma(u)$ as,
+\\
+\begin{align*}
+A = & \, \, 2 \sup_{s \in [0,T]} \left(\| R_u(s)\|_a\|  + \| (f - f_{h_\tau})(s)\|_a\right) \\
+& + \int_0^{T} \| \partial_t R_u (s)\|_a \, ds  + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds 
+\end{align*}
+\\
+and,
+\begin{align*}
+B^2 = 
+& \, + \|(g_2-\pi^0g_{2h_\tau})(s)\|_{d'}\bigr)^2\, ds \\
+& \, + \tfrac{1}{2}\|u_0 - u_{0 h} \|^2_a + \tfrac{1}{2}\|p_{1_0} - p_{1h_0} \|^2_c + \tfrac{1}{2}\|p_{2_0} - p_{2h_0} \|^2_c \\
+& \, + \tfrac{1}{2} \int_0^{T} \|(p_{1h_\tau}-\pi^0p_{1h_\tau})(s)\|_{\hat{d}}^2 ds \\
+& \, + \tfrac{1}{2} \int_0^{T} \|(p_{2h_\tau}-\pi^0p_{2h_\tau})(s)\|_{\hat{d}}^2 ds \\
+& \, \int_0^{T} \bigl( \| R_{p_1}(s)\|_{d'}  + \| R_{p_2}(s)\|_{d'} + \|(g_1-\pi^0g_{1h_\tau})(s)\|_{d'} 
+\end{align*}
+and,
+\begin{align*}
+\sigma(u) = \sup_{s \in [0,T]} \| \hat{u}(s)\|_a
+\end{align*}
+Following the proof structure from section section \ref{biot_proof_struc}, we use \eqref{biot:sigma_young} and \eqref{biot:error1} on \eqref{bb:up_bd4} and the fact that $R_u$ is piecewise affine, $R_{p_1}$ and $R_{p_2}$ are piecewise constant. Applying 
+\eqref{biot:time_est_outline} on the last two terms in $B^2$ concludes the proof.  
+\end{proof}
+
+\begin{theorem} \label{theorem}
+%In the above framework and for all timesteps $t_m \in \{1,...,N \}$ the total error $e$, defined by \eqref{mpet:total_error}, satisfies the upper a posteriori estimate given by
+The following a posteriori error estimate holds for the total error $e^k$ of \eqref{mpet:total_error}: 
+\begin{align} \label{mpet2_up_bd}
+\sup\limits_{0\leq k \leq N} e^k \leq & \, c_1 \sup_{0\leq m\leq N } \eta^m_u + c_2\sum_{m=1}^N (\eta^m_u(\delta_t)) + c_3\sum_{m=1}^N \tau_m (\eta^m_{p_1,0} + \eta^m_{p_2,0}) \\
+& + c_4\sum_{m=1}^N \tau_m (\|p^m_{1h} - p^{m-1}_{1h}\|_{\hat{d}}^2 + \|p^m_{2h} - p^{m-1}_{2h}\|_{\hat{d}}^2).\notag
+\end{align}
+In addition we also have the following lower estimates, where $T \in \mathcal{T}_h$ denotes a mesh simplex, given by 
+%These estimators also form a lower bound for all $T \in \mathcal{T}_h$,
+\begin{align} \label{mpet2_low_bd1}
+\eta^m_u \leq \tilde{c}\sum_{T' \in \mathcal{T}_h} & \,\biggl( \|u^m-u^m_h \|^2_{H^1(\omega_{T'})} + \|p_1^m-p^m_{1h} \|^2_{H^1(\omega_{T'})} + \|p_2^m-p^m_{2h} \|^2_{H^1(\omega_{T'})} \\
+ & \, + h_{T'}^2 \|f^m_h-f^m_{T'}\|^2_{H^1(T')} \biggr) \notag
+\end{align}
+\begin{align}\label{mpet2_low_bd2}
+\eta^m_{p_1+p_2,\beta} \leq \tilde{d} \sum_{T' \in \mathcal{T}_h} & \, \biggl(\|p_1^m-p_1^{m-1} + p_{1h}^m-p_{1h}^{m-1} \|^2_{H^1(\omega_{T'})} \\
+& \, + \|p_2^m-p_2^{m-1} + p_{2h}^m-p_{2h}^{m-1} \|^2_{H^1(\omega_{T'})} \notag\\
+& \, + \|u^m-u^{m-1} + u_h^m-u_h^{m-1} \|^2_{H^1(\omega_{T'})} \notag\\
+& \, + \int_{I_m} h_{T}^2 (\|(g_1-\pi^0g_{1h_\tau})(s)\|^2_{H^1(T')} \notag\\
+& \, + \|(g_2-\pi^0g_{2h_\tau})(s)\|^2_{H^1(T')}) ds  \notag\\
+& \, + \int_{I_m} (\|(p_1-\pi^0p_{1h_\tau})(s)\|^2_{H^1(T')} \notag\\
+& \, + \|(p_2-\pi^0p_{2h_\tau})(s)\|^2_{H^1(T')} ds \biggr)\notag
+\end{align}
+where $\eta^m_u$ and $\eta^m_{p_1+p_2,\beta}$ are defined as in \eqref{bb_error_indicators1} and \eqref{bb_error_indicators2a}-\eqref{bb_error_indicators2b}.
+\end{theorem}
+\begin{proof}
+Using Proposition \ref{prop} we know that, 
+\begin{align}
+e^n \leq \mathcal{E}_{\textnormal{dat}} + \mathcal{E}_{\textnormal{spc}} + \mathcal{E}_{\textnormal{tim}} 
+\end{align}
+We first observe that for all $m \in \{0,..,N\}$,
+\begin{align}
+\| R_u^m\|^2_a \leq c_1\eta^m_u
+\end{align}
+and for all $m \in \{1,..,N\}$,
+\begin{align}
+\| R_{p_1}^m\|^2_{d'} + \| R_{p_2}^m\|^2_{d'} \leq c_2(\eta^m_{p_1,0} + \eta^m_{p_2,0}), 
+\\ 
+\notag\\
+\| R_u^m -R_u^{m-1} \|^2_a \leq c_3\eta^m_u(\delta_t) \notag
+\end{align}
+This follows from the arguments made in section \ref{poisson_up_bd_section}. Finally, \eqref{mpet2_up_bd} follows from the definition of $\mathcal{E}_{\textnormal{spc}}$ and $\mathcal{E}_{\textnormal{tim}}$. \eqref{mpet2_low_bd1} and \eqref{mpet2_low_bd2} follows from the proof structure given in section \ref{section:poisson_lower bound} (equations \eqref{lowbd1}-\eqref{eq:low_bd_edge17}). 
+\end{proof}
+%
+%The following section summarizes the results for the Barenblatt-Biot model. 
+%\paragraph{Residual a posteriori error estimate}\label{bb:case2_res_err}\mbox{} \\
+%\todo{add theorem with all results!} We define the following a posteriori error estimator for MPET with two networks, where we have for all $n \in \{1,...,N \}$,
+%\begin{equation*}
+%e \leq \mathcal{E}_{\textnormal{dat}} + \mathcal{E}_{\textnormal{spc}} + \mathcal{E}_{\textnormal{tim}} 
+%\end{equation*}
+%where the error $e$ is defined as,
+%\begin{align*}
+%e = \tfrac{1}{2}\|u^n - u^n_{h_\tau} \|^2_a + \tfrac{1}{2}\|p_1^n - p^n_{1h_\tau} \|^2_c
+%+ \tfrac{1}{2}\|p_2^n - p^n_{2h_\tau} \|^2_c \\
+%+ \tfrac{1}{4}\int_0^{t_n} \|(p_1 - p_{1h_\tau})(s) \|^2_d ds + \tfrac{1}{4}\int_0^{t_n} \|(p_2 - p_{2h_\tau})(s) \|^2_d \, ds \notag \\ 
+%+ \tfrac{1}{4}\int_0^{t_n} |(p_1-p_{1h_\tau})(s)|_T^2 ds + \tfrac{1}{4}\int_0^{t_n} |(p_2-p_{2h_\tau})(s)|_T^2 ds \notag \\ 
+%+ \tfrac{1}{2}\int_0^{t_n} \|(p_1 - \pi^0p_{1h_\tau})(s) \|^2_d \, ds + \tfrac{1}{2}\int_0^{t_n} \|(p_2 - \pi^0p_{2h_\tau})(s) \|^2_d \, ds \notag \\
+%+ \tfrac{1}{2}\int_0^{t_n} |(p_1 - \pi^0p_{1h_\tau})(s) |^2_T \, ds + \tfrac{1}{2}\int_0^{t_n} |(p_2 - \pi^0p_{2h_\tau})(s) |^2_T \, ds
+%\end{align*}
+%and the error estimators, $\mathcal{E}_{\textnormal{dat}}$, $\mathcal{E}_{\textnormal{spc}}$, $\mathcal{E}_{\textnormal{tim}}$ are defined as,
+%\begin{align*} 
+%\mathcal{E}(f,g) = & \, \int_0^{T}  \|(g-\pi^0 g_{h_\tau})(s)\|^2_{d'} \, ds + \biggl( 2 \sup_{s \in [0,T]} \| (f - f_{h_\tau})(s)\|_a \\
+%& \, + \int_0^{T} \| \partial_t (f - f_{h_\tau})(s)\|_a \, ds \biggr)^2 \\
+%\mathcal{E}_{\textnormal{dat}} = & \, \|u_0 - u_{0 h} \|^2_a + \|p_{1_0} - p_{1h_0} \|^2_c + \|p_{2_0} - p_{2h_0} \|^2_c + 4\mathcal{E}(f, g_1 + g_2) \\
+%\mathcal{E}_{\textnormal{spc}} = & \, 4 \tau_m\sum_{m=1}^N ( \| R_{P_1}^m\|^2_{d'} + \| R_{P_2}^m\|^2_{d'}) \, ds \\
+%& \, + 4\biggl(2 \sup_{0 \leq m \leq N} \| R_u^m\|_a\| + \sum_{m=1}^N \| R_u^m - R_u^{m-1}\|_a \biggr)^2 \\
+%\mathcal{E}_{\textnormal{tim}} = & \,\sum_{m=1}^N \frac{1}{3}\tau_m (\|p^m_{1_h} - p^{m-1}_{1_h}\|_{\hat{d}}^2 + |p^m_{2_h} - p^{m-1}_{2_h}\|_{\hat{d}}^2) 
+%\end{align*}
+%The error estimates, $\mathcal{E}_{\textnormal{spc}}$ and $\mathcal{E}_{\textnormal{tim}}$ can be bounded using the error indicators $\eta_u$ and $(\eta_{p_1}, \eta_{p_2})$ from \eqref{bb_error_indicators1}-\eqref{bb_error_indicators2}. These form an upper bound on the error,
+%\begin{align*}
+%e \leq & c_1\sup_{m \in [1,N]} \eta^m_u + c_2\sum_{m=1}^N (\eta^m_u(\delta_t)) + c_3\sum_{m=1}^N \tau_m (\eta^m_{p_1,0} + \eta^m_{p_2,0}) \\
+%& + c_4\sum_{m=1}^N \tau_m (\|p^m_{1h} - p^{m-1}_{1h}\|_{\hat{d}}^2 + \|p^m_{2h} - p^{m-1}_{2h}\|_{\hat{d}}^2
+%\end{align*}
+%The estimators also form a lower bound such that for all $T \in \mathcal{T}$,
+%\begin{align*}
+%\eta^m_u \leq \tilde{c}\sum_{T' \in \mathcal{T}_h} & \,\biggl( \|u^m-u^m_h \|^2_{H^1(\omega_{T'})} + \|p_1^m-p^m_{1h} \|^2_{H^1(\omega_{T'})} + \|p_2^m-p^m_{2h} \|^2_{H^1(\omega_{T'})} \\
+% & \, + h_{T'}^2 \|f^m_h-f^m_{T'}\|^2_{H^1(T')} \biggr)
+%\end{align*}
+%\begin{align*}
+%\eta^m_{p_1+p_2,\beta} \leq \tilde{d} \sum_{T' \in \mathcal{T}_h} & \, \biggl(\|p_1^m-p_1^{m-1} + p_{1h}^m-p_{1h}^{m-1} \|^2_{H^1(\omega_{T'})} \\
+%& \, + \|p_2^m-p_2^{m-1} + p_{2h}^m-p_{2h}^{m-1} \|^2_{H^1(\omega_{T'})} \\
+%& \, + \|u^m-u^{m-1} + u_h^m-u_h^{m-1} \|^2_{H^1(\omega_{T'})} \\
+%& \, + \int_{I_m} h_{T}^2 (\|(g_1-\pi^0g_{1h_\tau})(s)\|^2_{H^1(T')} \\
+%& \, + \|(g_2-\pi^0g_{2h_\tau})(s)\|^2_{H^1(T')}) ds  \\
+%& \, + \int_{I_m} (\|(p_1-\pi^0p_{1h_\tau})(s)\|^2_{H^1(T')} \\
+%& \, + \|(p_2-\pi^0p_{2h_\tau})(s)\|^2_{H^1(T')} ds \biggr)
+%\end{align*}
+%
+\begin{remark}
+Note that we may bound $\mathcal{E}_{\textnormal{tim}}$ using Young's inequality such that, 
+\begin{align*}
+\mathcal{E}_{\textnormal{tim}} = & \,\sum_{m=1}^N \frac{1}{3}\tau_m (\|p^m_{1_h} - p^{m-1}_{1_h}\|_{\hat{d}}^2 + \|p^m_{2_h} - p^{m-1}_{2_h}\|_{\hat{d}}^2) \\ 
+= & \,\sum_{m=1}^N \frac{1}{3}\tau_m \biggl( (\|p^m_{1_h} - p^{m-1}_{1_h}\|_d + \|p^m_{1_h} - p^{m-1}_{1_h}\|_T)^2 \\
+& \, + (\|p^m_{2_h} - p^{m-1}_{2_h}\|_{d} + \|p^m_{2_h} - p^{m-1}_{2_h}\|_{T})^2 \biggr)\\
+\leq & \, \sum_{m=1}^N \frac{2}{3}\tau_m \biggl(\|p^m_{1_h} - p^{m-1}_{1_h}\|^2_d + \|p^m_{1_h} - p^{m-1}_{1_h}\|_T^2 \\
+& \, + \|p^m_{2_h} - p^{m-1}_{2_h}\|^2_{d} + \|p^m_{2_h} - p^{m-1}_{2_h}\|_{T}^2 \biggr)
+\end{align*}
+We may also bound $\mathcal{E}(f,g_1+g_2)$ using the triangle inequality as we did in \ref{bb:case1_res_err}. 
+\end{remark}
+\begin{remark}
+The constants $c_i$, $i=1,..,6$ will depend on the shape parameters as as well as the stiffness tensor. 
+\end{remark}
+\begin{remark}
+The a posteriori error estimates will depend on the model parameters. That is, $\eta^m_u$ and $\eta^m_u(\delta_t)$ will depend on the size of $\alpha_1, \alpha_2$ and the Lamé parameters $\mu$ and $\lambda$. $\eta^m_{p_a,0}$  will depend on the size of $c_a, \alpha_a, K_a$ and $\xi_a$, $a=1,2$. The time estimator $ \|p^m_{1h} - p^{m-1}_{1h}\|_d^2 + \|p^m_{2h} - p^{m-1}_{2h}\|_d^2$ depends on the numerical solutions of $p_a$ which in turn depends on $c_a, \alpha_a$ and $K_a$, $a=1,2$.
+\end{remark}
+\begin{remark}
+We will expect to see the same convergence rates as for the Biot model, using piecewise quadratics for the displacement and piecewise linears for the pressure. That is, we expect the spatial error estimators to converge to the order of their polynomial approximation under space refinement and the time estimator to converge to a first order under time refinement. 
+\end{remark}
+\begin{remark}
+The error terms in $e^n$ are squared. Using Young's inequality on the upper bound \eqref{mpet2_up_bd} yields the upper bound that is used for the numerical implementation in chapter \ref{chap:experiments} with $\sqrt{e}=E$, i.e.,
+\begin{align*}
+E^n \leq & \underbrace{\sup_{m \in [1,N]} (\eta^m_u)^\frac{1}{2}}_{\eta_1} + \underbrace{\left(\sum_{m=1}^N \tau_m \eta^m_{p_1,0} + \eta^m_{p_2,0}\right)^\frac{1}{2}}_{\eta_2} + \underbrace{\sum_{m=1}^N (\eta^m_u(\delta_t))^\frac{1}{2}}_{\eta_3} \\
+& + \underbrace{\left(\sum_{m=1}^N \tau_m (\|p^m_{1h} - p^{m-1}_{1h}\|_d^2 + \|p^m_{2h} - p^{m-1}_{2h}\|_d^2) )\right)^\frac{1}{2}}_{\eta_4}
+\end{align*}
+\end{remark}
+
+
+

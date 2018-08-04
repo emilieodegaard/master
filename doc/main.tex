@@ -1,0 +1,51 @@
+\documentclass[a4paper, 11.5pt]{memoir}
+\usepackage{style}      % Custom style
+\usepackage[CS,60,LongTitle]{masterfrontpage}
+\usepackage{kantlipsum} % Dummy text
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+		\node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+
+\title{A posteriori error estimation for multiple-network poroelasticity}
+\author{Emilie Ødegaard}
+
+\includeonly{
+    sections/abstract,
+    sections/acknowledgements,
+    sections/introduction,
+    sections/mathematical_background,
+    sections/numerical_discretization,
+    sections/error_estimation,
+    sections/numerical_experiments,
+    sections/summary_discussion
+	%sections/appendixA,
+	%sections/appendixB
+}
+\begin{document}
+	\masterfrontpage
+    \frontmatter        % Folios in Roman numerals, unnumbered chapters.
+	\include{sections/abstract}
+	\include{sections/acknowledgements}
+	
+    \tableofcontents    % Or \tableofcontents*
+    %\listoffigures
+    %\listoftables
+
+    \mainmatter         % Folios in Arabic numerals, numbered chapters.
+
+    %\appendix           % "Chapter" is renamed "Appendix"
+    %\appendixpage       % Short for \part*{Appendices}
+	\include{sections/introduction}
+	\include{sections/mathematical_background}
+	\include{sections/numerical_discretization}
+	\include{sections/error_estimation}
+	\include{sections/numerical_experiments}
+	\include{sections/summary_discussion}
+    %\include{sections/appendixA} 
+    \backmatter         % Folios in Arabic numerals, unnumbered chapters
+    \printbibliography
+\end{document}

@@ -1,0 +1,121 @@
+\documentclass{article}
+
+\usepackage{glossaries}
+
+\makeglossaries
+
+\newglossaryentry{lengthtree}%
+{%
+  name={$L_t$},
+  text={L_t},
+  description={description here},
+  sort={L}
+}
+The convention that a bold face character denotes a vector is adopted within this thesis. Furthermore, the following list of symbols are used.
+Ω Ωs Ωd
+Γ Γ∂Ω Γ∂ Ωs Γ∂ Ωd ns nd
+τ
+u
+p
+(·)s (·)d
+∇·f ∇f ∇2f
+Ci,i ∈ N K,K
+ρ
+μ
+α
+βn
+βs, βd
+R
+N C0(Ω) C∞(Ω)
+General symbols
+The domain of interest, an open subset of Rn Stokes part of the domain
+Darcy part of the domain
+Interface between Ωs and Ωd, i.e ∂Ωs ∩ ∂Ωd Exterior boundary of Ω, i.e. ∂Ω
+Exterior boundary of Ωs, i.e. ∂Ωs ∩ ∂Ω Exterior boundary of Ωd, i.e. ∂Ωd ∩ ∂Ω Unit normal vector exterior to ∂Ωs Unit normal vector exterior to ∂Ωd Unit tangential vector at Γ
+Velocity field
+Pressure
+Physical quantity of Stokes domain Physical quantity of Darcy domain
+Divergence of f Gradient of f
+:= ∇ · (∇f) = ∆f
+Generic constant where Ci ∈ R, Ci > 0 Model parameters
+Tensor permeability, scalar permeability Density
+Viscosity
+Beavers–Joseph–Saffmann coefficient Penalty parameter, Nitsche’s method Penalty parameters, the IP method Function spaces
+Real numbers
+Natural numbers
+Set of continuous functions
+Set of smooth functions
+8
+m2
+kg m−3 m2 s−1
+Ck(Ω)
+C0k(Ω)
+L2(Ω)
+L20(Ω)
+Hm(Ω) H0m(Ω)
+H(div, Ω) H−1(Ω) H∗(Ω)
+⟨·, ·⟩Ω ∂ΩD ∂ΩN Th
+T Pq(T) h
+Pq DGq RTk BDMk ΓIh
+Γsh
+Γdh
+Kk κ(A) N(A)
+Set of functions with continuous derivatives up to order k Subset of Ck of functions with compact support
+Space of square-integrable functions
+Subset of L2 of functions with compact support
+Sobolev space of L2 functions with square-integrable Subset of Hm of functions with compact support
+derivatives up to order m
+:= {v ∈ L2(Ω) : div v ∈ L2(Ω)}
+Dual space of H1(Ω)
+Dual space of H(Ω)
+The finite element method
+L2-inner product over Ω
+Part of the boundary ∂Ω with Dirichlet boundary conditions Part of the boundary ∂Ω with Neumann boundary conditions Partition of Ω
+Element in Th
+Space of polynomials of total degree ≤ q over T
+Maximum diameter of the elements in Th
+Lagrange element of degree q
+Discontinuous Galerkin element of degree q
+Raviart–Thomas element of degree k
+Brezzi–Douglas–Marini element of degree k
+Interior facets in Th
+Interior facets in Stokes part of Th
+Interior facets in Darcy part of Th
+Iterative methods
+Krylov space of order k
+Condition number of A
+Number of iterations it takes to solve Ax = b
+
+%
+%$\Omega$ Domain 
+%\\
+%$\partial\Omega$ Domain boundary
+%\\
+%$\mathbf{n}$
+%\\
+%$\nabla$
+%\\
+%$\nabla \cdot$
+%\\
+%$\Delta$
+%\\
+%$H^k$ Sobolev space
+%\\
+%Finite element space
+%\\
+%Finite element partition + set notation
+%\\
+%Shape parameter 
+%\\
+%Element diameter
+
+\begin{document}
+
+In line: $\gls{lengthtree}$. In math mode: 
+\[
+  \gls{lengthtree}
+\]
+
+
+
+\end{document}

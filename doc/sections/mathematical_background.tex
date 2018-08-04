@@ -1,0 +1,78 @@
+\chapter{Mathematical models} 
+\label{chap:math}
+The multiple-network poroelasticity equations (MPET) describe the relationship between flow and deformation in a poroelastic medium with interconnected fluid networks. The model was first introduced as an application in geosciences to model storage reservoirs \cite{aifantis1979, aifantis1980, berryman2002}. Since porous media includes biological tissues, Tully and Ventikos \cite{tully} suggests that the equations can be used to model interacting biological fluids and tissues in a physiological setting, which is also the primary motivation behind this thesis. 
+\\
+\\
+This chapter outlines the mathematical models used in the thesis. Section \ref{section:mpet} presents the MPET model and is mainly based on the work of Bai et al. \cite{bai}. Section \ref{section:poisson} presents the Poisson model, which is used to introduce the main mathematical methods in chapter \ref{chap:error}. The Poisson model is presumed to be the most fundamental PDE and is often used as a simple model problem before tackling more complex PDEs, which is also the purpose it serves here. 
+
+\section{Multiple-network poroelasticity model (MPET)} 
+\label{section:mpet}
+We consider a linearly elastic and porous medium $\Omega$ saturated by a nearly incompressible and viscous  fluid. The multiple-network poroelasticity model (MPET) is defined as
+\\
+\begin{align} \label{eq:mpet1}
+\rho \ddot{u} - \nabla \cdot (\sigma^{\ast}) + \displaystyle\sum_a \alpha_a \nabla p_a = 0  \\ 
+- \nabla \cdot K_a \rho_a  \ddot{u} +  c_a\dot{p_a} + \alpha_a \nabla \cdot\dot{u} - \nabla \cdot K_a \nabla p_a + S_a = g_a  \label{eq:mpet2}
+\end{align}
+\\
+where we for each network $a=1,2,\dots, A$ seek the displacement $u = u(x,t)$ and the pressure $p_a = p_a(x,t)$ for $x \in \Omega$ and time $t$ such that \eqref{eq:mpet1}-\eqref{eq:mpet2} is fulfilled. The equations arises from a balance of mass and momentum in an elastic porous medium permeated by fluid networks.
+\\
+\\
+We denote $\dot{u}$ as the time derivative of $u$. $\rho$ represents the density of the elastic tissue matrix and $\alpha_a$ the Biot-Willis coefficient. $K_a$ denotes the mobility of the medium where $K_a = \kappa_a/\mu_a$ and $\kappa_a$ is defined as the permeability and $\mu_a$ the viscosity. $\rho_a$ denotes the density and $c_a$ the compressibility in network $a$. $\dot{s}_{b \rightarrow a} $ represents the nonnegative exchange coefficients from network $b$ to $a$ and $g_a$ is defined as any sources/sinks in network $a$. 
+\\
+\\
+Assuming that the medium deforms elastically and anisotropically, a fourth order stiffness tensor $C$ defines the stress tensor $\sigma^*$ by Hooke's law:
+\begin{align}
+\sigma^*(u) = 2\mu \, \epsilon(u) + \lambda \textnormal{tr}(\epsilon(u)) I
+\end{align}
+where $\epsilon(u)$ is the symmetric gradient, 
+\begin{align}
+\epsilon(u) = \frac{1}{2}\left( \nabla(u) + \nabla(u^T)\right)
+\end{align}
+The trace of $u$, $\textnormal{tr}(u)$ is defined as the sum of the elements on the main diagonal of $u$. $I$ is the identity matrix. 
+\\
+\\
+The transfer terms $S_a$ quantifies the transfer out of network $a$ into the other fluid networks. If a hydrostatic pressure gradient powers the the rate of transfer from network $b$ to $a$, the exchange coefficients can be described as:
+\begin{align}
+S_a(\vec{p}) = S_a(p_1, ...,p_A) = \displaystyle\sum_{b=1}^A \xi_{b \rightarrow a}(p_a - p_b)
+\end{align}
+where $\xi_{b \rightarrow a}$ is a transfer coefficient from network $b$ to $a$. We assume that the transfer coeffiecient are nonnegative, i.e. $\xi_{j \to i} \geq 0$ for $1 \leq i,j \leq A$. In addition, we assume $\xi_{i \to i} = 0$ for all $i \in \{1, ..., A\}$ and $\xi_{i \to j} = \xi_{j \to i}$ for all $i,j \in \{1, ..., A\}$. We set $c_a^{-1} = \infty$ and $\alpha_a = 1 $ for all $a$ if all networks are assumed incompressible. 
+\\
+\\
+%%%%%%%%%%%%%%%%%%%%%%% SIMPLIFIED MODEL %%%%%%%%%%%%%%%%%%%%%%
+In this thesis we will ignore the acceleration terms, so that our model is reduced to: 
+\\
+\begin{align} \label{eq:mpet_simple1}
+- \nabla \cdot (\sigma^{\ast}) + \displaystyle\sum_a \alpha_a \nabla p_a = 0
+\\
+ c_a\dot{p_a} + \alpha_a \nabla \cdot\dot{u} - \nabla \cdot K_a \nabla p_a + S_a = g_a \label{eq:mpet_simple2}
+\end{align}
+This is known as the quasi-static formulation of the Barenblatt-Biot model, which is appropriate when the application does not involve shear or compression waves, e.g. systolic pulsation \cite{tully}. 
+\\
+\\
+%%%%%%%%%%%%%%%%%%%%%%% BIOT %%%%%%%%%%%%%%%%%%%%%%%
+When we are working with one network, \eqref{eq:mpet_simple1}-\eqref{eq:mpet_simple2} is reduced to what is known as the  \textit{Biot model} \cite{biot}. This model studies a medium assumed to contain only one fluid network permeating it. 
+\begin{align} \label{eq:biot1}
+- \nabla \cdot(\sigma^{\ast}) +  \alpha \nabla p = f \\
+c\dot{p} + \alpha \nabla \cdot\dot{u} - \nabla \cdot K \nabla p = g \label{eq:biot2}
+\end{align}
+Here $f$ denotes any external forces and $g$ the source/sink in the network. An analysis of the existence and uniqueness of the strong and weak solutions of the Biot model has been derived in \cite{showalter, zenisek}. Note that since there is only one network, there exists no transfer and thus, $S_a=0$.
+\\
+\\
+%%%%%%%%%%%%%%%%%%%%%%% BIOT-BARENBLATT %%%%%%%%%%%%%%%%%%%%%%%
+The \textit{Barenblatt-Biot model} \cite{Barenblatt1960,Barenblatt1963, elsworth, berryman1995} extends the Biot model \eqref{eq:biot1}-\eqref{eq:biot2} to another network, i.e. $A=2$. Here the poroelastic medium is assumed to have a dual permeability, which results in a system with two diffusion equations representing the two networks. These are coupled by an exchange term which describes the potential difference between the fluids in the two fluid components. The quasi-static formulation of the Barenblatt-Biot model is,
+%The problem then becomes: find $u = u(x,t)$ and the pressure $p_1 = p_1(x,t)$, $p_2 = p_2(x,t)$ for $x \in \Omega$ and time $t$ such that
+\begin{align} \label{math_model:mpet2_u}
+- \nabla \cdot(\sigma^{\ast}) +  \alpha_1 \nabla p_1 +  \alpha_2 \nabla p_2 = f \\
+c_1\dot{p}_1 + \alpha_1 \nabla \cdot \dot{u} - \nabla \cdot (K_1 \nabla p_1) + \xi_{2\to 1}(p_1-p_2) = g_1 \label{math_model:mpet2_p1}\\
+c_2\dot{p}_2 + \alpha_2 \nabla \cdot \dot{u} - \nabla \cdot(K_2 \nabla p_2) + \xi_{1\to 2}(p_2-p_1) = g_2 \label{math_model:mpet2_p2}
+\end{align}
+where $u$ is the displacement and $p_1$ and $p_2$ are the fluid potentials in the respective fluid components. $f$ denotes any external forces and $g_1$ and $g_2$ sources/sinks in networks $1$ and $2$, respectively. We also denote $\xi_{2\to 1}$ as the transfer coefficient from network 1 to network 2, and vice verca for $\xi_{1\to 2}$. The existence of solution for the Barenblatt-Biot model can be found in \cite{showalter, showalter2002}.
+
+\section{Poisson model} \label{section:poisson}
+The Poisson equation is an elliptic PDE which describes a potential field caused by a charge density \cite{bitsadze}. We assume homogeneous Dirichlet boundary conditions. Then the Poisson problem is defined as,
+\\
+\begin{align} \label{eq:poisson_strong_form}
+- \Delta \, u = & \, f \hspace{0.5cm} \textnormal{in} \hspace{0.2cm} \Omega \\
+u = & \, 0 \hspace{0.5cm} \textnormal{on} \hspace{0.2cm}\Gamma_D
+\end{align}
+As with the poroelasticity equations, $f$ denotes any external forces. We know that there exists a unique solution for the Poisson model, see e.g. \cite{evans}.
