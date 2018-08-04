@@ -1,7 +1,7 @@
 # Overview of files
 
 ## doc
-Contains all tex-files for the thesis.
+Contains all tex-files.
 
 ## src
-Contains all code for the thesis.
+Contains all code.
