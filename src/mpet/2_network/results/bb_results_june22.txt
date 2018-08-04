@@ -1,0 +1,421 @@
+==== Barenblatt-Biot, default parameters, no transfer ====
+alpha = (1.0, 1.0) nu = None E =  None mu = 0.5
+lamb =  1.0 c =  (1.0, 1.0) K = (1.0, 1.0) psi =  (0.0, 0.0)
+============= Space refinement =============
+N = 4, dt = 5.0e-05, u: 3.458e-02, p1: 1.999e-03, p2: 1.999e-03
+eta1: 5.172e-01, eta2: 9.626e-01, eta3: 1.530e-03, eta4: 2.875e-04
+N = 8, dt = 5.0e-05, u: 8.318e-03, p1: 9.255e-04, p2: 9.255e-04
+eta1: 2.839e-01, eta2: 2.454e-01, eta3: 7.860e-04, eta4: 2.915e-04
+N = 16, dt = 5.0e-05, u: 2.038e-03, p1: 2.641e-04, p2: 2.641e-04
+eta1: 1.462e-01, eta2: 6.167e-02, eta3: 3.961e-04, eta4: 2.922e-04
+N = 32, dt = 5.0e-05, u: 5.081e-04, p1: 6.615e-05, p2: 6.615e-05
+eta1: 7.396e-02, eta2: 1.544e-02, eta3: 1.985e-04, eta4: 2.924e-04
+N = 64, dt = 5.0e-05, u: 1.286e-04, p1: 1.543e-05, p2: 1.543e-05
+eta1: 3.717e-02, eta2: 3.863e-03, eta3: 9.930e-05, eta4: 2.924e-04
+rate eta4 = -0.020
+rate eta4 = -0.004
+rate eta4 = -0.001
+rate eta4 = -0.000
+rate p2 = 1.111
+rate p2 = 1.809
+rate p2 = 1.997
+rate p2 = 2.100
+rate p1 = 1.111
+rate p1 = 1.809
+rate p1 = 1.997
+rate p1 = 2.100
+rate u = 2.055
+rate u = 2.029
+rate u = 2.004
+rate u = 1.982
+============= Time refinement =============
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 2.0e-02, u: 2.912e-03, p1: 4.508e-03, p2: 4.508e-03
+eta1: 1.185e-01, eta2: 2.948e-03, eta3: 1.985e-02, eta4: 2.719e-01
+N = 128, dt = 1.0e-02, u: 1.258e-03, p1: 1.938e-03, p2: 1.938e-03
+eta1: 1.190e-01, eta2: 2.947e-03, eta3: 9.930e-03, eta4: 1.378e-01
+N = 128, dt = 5.0e-03, u: 5.807e-04, p1: 8.900e-04, p2: 8.900e-04
+eta1: 1.192e-01, eta2: 2.947e-03, eta3: 4.965e-03, eta4: 6.934e-02
+N = 128, dt = 2.5e-03, u: 2.798e-04, p1: 4.261e-04, p2: 4.261e-04
+eta1: 1.194e-01, eta2: 2.948e-03, eta3: 2.483e-03, eta4: 3.478e-02
+N = 128, dt = 1.3e-03, u: 1.392e-04, p1: 2.095e-04, p2: 2.095e-04
+eta1: 1.194e-01, eta2: 2.948e-03, eta3: 1.241e-03, eta4: 1.742e-02
+rate eta4 = 0.981
+rate eta4 = 0.991
+rate eta4 = 0.995
+rate eta4 = 0.998
+rate p2 = 1.218
+rate p2 = 1.123
+rate p2 = 1.062
+rate p2 = 1.025
+rate p1 = 1.218
+rate p1 = 1.123
+rate p1 = 1.062
+rate p1 = 1.025
+rate u = 1.210
+rate u = 1.116
+rate u = 1.053
+rate u = 1.007
+============= Time/space refinement =============
+N = 4, dt = 6.2e-02, u: 3.568e-02, p1: 2.148e-02, p2: 2.148e-02, eta1: 3.143e+00, eta2: 2.952e+00, eta3: 1.898e+00, eta4: 7.813e-01
+N = 8, dt = 6.2e-02, u: 1.823e-02, p1: 2.175e-02, p2: 2.175e-02, eta1: 1.760e+00, eta2: 7.491e-01, eta3: 9.752e-01, eta4: 7.961e-01
+N = 16, dt = 6.2e-02, u: 1.476e-02, p1: 2.192e-02, p2: 2.192e-02, eta1: 9.148e-01, eta2: 1.880e-01, eta3: 4.915e-01, eta4: 7.998e-01
+N = 32, dt = 6.2e-02, u: 1.417e-02, p1: 2.199e-02, p2: 2.199e-02, eta1: 4.639e-01, eta2: 4.708e-02, eta3: 2.463e-01, eta4: 8.008e-01
+rate eta4 = -0.027
+rate eta4 = -0.007
+rate eta4 = -0.002
+rate p2 = -0.018
+rate p2 = -0.011
+rate p2 = -0.004
+rate p1 = -0.018
+rate p1 = -0.011
+rate p1 = -0.004
+rate u = 0.968
+rate u = 0.305
+rate u = 0.059
+rate eta1 = 0.836
+rate eta1 = 0.944
+rate eta1 = 0.980
+rate eta2 = 1.978
+rate eta2 = 1.994
+rate eta2 = 1.997
+rate eta3 = 0.961
+rate eta3 = 0.988
+rate eta3 = 0.997
+N = 4, dt = 1.6e-02, u: 1.424e-02, p1: 8.918e-03, p2: 8.918e-03, eta1: 3.154e+00, eta2: 2.957e+00, eta3: 4.778e-01, eta4: 2.075e-01
+N = 8, dt = 1.6e-02, u: 5.569e-03, p1: 4.723e-03, p2: 4.723e-03, eta1: 1.779e+00, eta2: 7.501e-01, eta3: 2.455e-01, eta4: 2.121e-01
+N = 16, dt = 1.6e-02, u: 2.759e-03, p1: 3.516e-03, p2: 3.516e-03, eta1: 9.271e-01, eta2: 1.882e-01, eta3: 1.237e-01, eta4: 2.133e-01
+N = 32, dt = 1.6e-02, u: 2.247e-03, p1: 3.342e-03, p2: 3.342e-03, eta1: 4.706e-01, eta2: 4.711e-02, eta3: 6.200e-02, eta4: 2.136e-01
+rate eta4 = -0.031
+rate eta4 = -0.008
+rate eta4 = -0.002
+rate p2 = 0.917
+rate p2 = 0.426
+rate p2 = 0.073
+rate p1 = 0.917
+rate p1 = 0.426
+rate p1 = 0.073
+rate u = 1.355
+rate u = 1.013
+rate u = 0.296
+rate eta1 = 0.826
+rate eta1 = 0.940
+rate eta1 = 0.978
+rate eta2 = 1.979
+rate eta2 = 1.995
+rate eta2 = 1.998
+rate eta3 = 0.961
+rate eta3 = 0.988
+rate eta3 = 0.997
+N = 4, dt = 3.9e-03, u: 9.509e-03, p1: 7.804e-03, p2: 7.804e-03, eta1: 3.161e+00, eta2: 2.958e+00, eta3: 1.195e-01, eta4: 5.263e-02
+N = 8, dt = 3.9e-03, u: 3.629e-03, p1: 3.088e-03, p2: 3.088e-03, eta1: 1.786e+00, eta2: 7.504e-01, eta3: 6.140e-02, eta4: 5.383e-02
+N = 16, dt = 3.9e-03, u: 1.164e-03, p1: 1.138e-03, p2: 1.138e-03, eta1: 9.315e-01, eta2: 1.883e-01, eta3: 3.095e-02, eta4: 5.414e-02
+N = 32, dt = 3.9e-03, u: 5.629e-04, p1: 7.437e-04, p2: 7.437e-04, eta1: 4.730e-01, eta2: 4.713e-02, eta3: 1.551e-02, eta4: 5.422e-02
+rate eta4 = -0.033
+rate eta4 = -0.008
+rate eta4 = -0.002
+rate p2 = 1.338
+rate p2 = 1.440
+rate p2 = 0.614
+rate p1 = 1.338
+rate p1 = 1.440
+rate p1 = 0.614
+rate u = 1.390
+rate u = 1.641
+rate u = 1.048
+rate eta1 = 0.824
+rate eta1 = 0.939
+rate eta1 = 0.978
+rate eta2 = 1.979
+rate eta2 = 1.995
+rate eta2 = 1.998
+rate eta3 = 0.961
+rate eta3 = 0.988
+rate eta3 = 0.997
+N = 4, dt = 9.8e-04, u: 8.426e-03, p1: 7.616e-03, p2: 7.616e-03, eta1: 3.164e+00, eta2: 2.958e+00, eta3: 2.988e-02, eta4: 1.320e-02
+N = 8, dt = 9.8e-04, u: 3.240e-03, p1: 2.913e-03, p2: 2.913e-03, eta1: 1.788e+00, eta2: 7.505e-01, eta3: 1.535e-02, eta4: 1.351e-02
+N = 16, dt = 9.8e-04, u: 9.245e-04, p1: 8.416e-04, p2: 8.416e-04, eta1: 9.328e-01, eta2: 1.883e-01, eta3: 7.737e-03, eta4: 1.359e-02
+N = 32, dt = 9.8e-04, u: 2.765e-04, p1: 2.818e-04, p2: 2.818e-04, eta1: 4.736e-01, eta2: 4.713e-02, eta3: 3.877e-03, eta4: 1.361e-02
+rate eta4 = -0.033
+rate eta4 = -0.008
+rate eta4 = -0.002
+rate p2 = 1.386
+rate p2 = 1.791
+rate p2 = 1.578
+rate p1 = 1.386
+rate p1 = 1.791
+rate p1 = 1.578
+rate u = 1.379
+rate u = 1.809
+rate u = 1.742
+rate eta1 = 0.823
+rate eta1 = 0.939
+rate eta1 = 0.978
+rate eta2 = 1.979
+rate eta2 = 1.995
+rate eta2 = 1.998
+rate eta3 = 0.961
+rate eta3 = 0.988
+rate eta3 = 0.997
+====== Barenblatt-Biot, default parameters ======
+alpha = (1.0, 1.0) nu = None E =  None mu = 0.5
+lamb =  1.0 c =  (1.0, 1.0) K = (1.0, 1.0) psi =  (1.0, 1.0)
+============= Space refinement =============
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 4, dt = 5.0e-05, u: 3.458e-02, p1: 2.121e-03, p2: 2.121e-03
+eta1: 5.173e-01, eta2: 9.626e-01, eta3: 1.530e-03, eta4: 4.067e-04
+N = 8, dt = 5.0e-05, u: 8.318e-03, p1: 9.499e-04, p2: 9.499e-04
+eta1: 2.839e-01, eta2: 2.454e-01, eta3: 7.860e-04, eta4: 4.123e-04
+N = 16, dt = 5.0e-05, u: 2.038e-03, p1: 2.699e-04, p2: 2.699e-04
+eta1: 1.462e-01, eta2: 6.167e-02, eta3: 3.961e-04, eta4: 4.133e-04
+N = 32, dt = 5.0e-05, u: 5.081e-04, p1: 6.752e-05, p2: 6.752e-05
+eta1: 7.396e-02, eta2: 1.544e-02, eta3: 1.985e-04, eta4: 4.135e-04
+N = 64, dt = 5.0e-05, u: 1.286e-04, p1: 1.570e-05, p2: 1.570e-05
+eta1: 3.717e-02, eta2: 3.863e-03, eta3: 9.930e-05, eta4: 4.136e-04
+rate eta4 = -0.020
+rate eta4 = -0.004
+rate eta4 = -0.001
+rate eta4 = -0.000
+rate p2 = 1.159
+rate p2 = 1.816
+rate p2 = 1.999
+rate p2 = 2.105
+rate p1 = 1.159
+rate p1 = 1.816
+rate p1 = 1.999
+rate p1 = 2.105
+rate u = 2.055
+rate u = 2.029
+rate u = 2.004
+rate u = 1.982
+============= Time refinement =============
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 2.0e-02, u: 2.912e-03, p1: 4.503e-03, p2: 4.503e-03
+eta1: 1.185e-01, eta2: 2.948e-03, eta3: 1.985e-02, eta4: 3.846e-01
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 1.0e-02, u: 1.258e-03, p1: 1.936e-03, p2: 1.936e-03
+eta1: 1.190e-01, eta2: 2.947e-03, eta3: 9.930e-03, eta4: 1.948e-01
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 5.0e-03, u: 5.807e-04, p1: 8.892e-04, p2: 8.892e-04
+eta1: 1.192e-01, eta2: 2.947e-03, eta3: 4.965e-03, eta4: 9.806e-02
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 2.5e-03, u: 2.798e-04, p1: 4.258e-04, p2: 4.258e-04
+eta1: 1.194e-01, eta2: 2.948e-03, eta3: 2.483e-03, eta4: 4.919e-02
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 1.3e-03, u: 1.392e-04, p1: 2.093e-04, p2: 2.093e-04
+eta1: 1.194e-01, eta2: 2.948e-03, eta3: 1.241e-03, eta4: 2.463e-02
+rate eta4 = 0.981
+rate eta4 = 0.991
+rate eta4 = 0.995
+rate eta4 = 0.998
+rate p2 = 1.218
+rate p2 = 1.122
+rate p2 = 1.062
+rate p2 = 1.025
+rate p1 = 1.218
+rate p1 = 1.122
+rate p1 = 1.062
+rate p1 = 1.025
+rate u = 1.210
+rate u = 1.116
+rate u = 1.053
+rate u = 1.007
+============= Time/space refinement =============
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 4, dt = 6.2e-02, u: 3.568e-02, p1: 2.141e-02, p2: 2.141e-02, eta1: 3.144e+00, eta2: 2.952e+00, eta3: 1.898e+00, eta4: 1.106e+00
+N = 8, dt = 6.2e-02, u: 1.823e-02, p1: 2.170e-02, p2: 2.170e-02, eta1: 1.760e+00, eta2: 7.491e-01, eta3: 9.752e-01, eta4: 1.126e+00
+N = 16, dt = 6.2e-02, u: 1.476e-02, p1: 2.188e-02, p2: 2.188e-02, eta1: 9.150e-01, eta2: 1.880e-01, eta3: 4.915e-01, eta4: 1.131e+00
+N = 32, dt = 6.2e-02, u: 1.417e-02, p1: 2.195e-02, p2: 2.195e-02, eta1: 4.640e-01, eta2: 4.708e-02, eta3: 2.463e-01, eta4: 1.133e+00
+rate eta4 = -0.027
+rate eta4 = -0.007
+rate eta4 = -0.002
+rate p2 = -0.020
+rate p2 = -0.012
+rate p2 = -0.005
+rate p1 = -0.020
+rate p1 = -0.012
+rate p1 = -0.005
+rate u = 0.968
+rate u = 0.305
+rate u = 0.059
+rate eta1 = 0.837
+rate eta1 = 0.944
+rate eta1 = 0.980
+rate eta2 = 1.978
+rate eta2 = 1.994
+rate eta2 = 1.997
+rate eta3 = 0.961
+rate eta3 = 0.988
+rate eta3 = 0.997
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 4, dt = 1.6e-02, u: 1.424e-02, p1: 8.892e-03, p2: 8.892e-03, eta1: 3.155e+00, eta2: 2.957e+00, eta3: 4.778e-01, eta4: 2.937e-01
+N = 8, dt = 1.6e-02, u: 5.569e-03, p1: 4.711e-03, p2: 4.711e-03, eta1: 1.779e+00, eta2: 7.501e-01, eta3: 2.455e-01, eta4: 3.000e-01
+N = 16, dt = 1.6e-02, u: 2.759e-03, p1: 3.510e-03, p2: 3.510e-03, eta1: 9.271e-01, eta2: 1.882e-01, eta3: 1.237e-01, eta4: 3.017e-01
+N = 32, dt = 1.6e-02, u: 2.247e-03, p1: 3.337e-03, p2: 3.337e-03, eta1: 4.706e-01, eta2: 4.711e-02, eta3: 6.200e-02, eta4: 3.021e-01
+rate eta4 = -0.031
+rate eta4 = -0.008
+rate eta4 = -0.002
+rate p2 = 0.916
+rate p2 = 0.425
+rate p2 = 0.073
+rate p1 = 0.916
+rate p1 = 0.425
+rate p1 = 0.073
+rate u = 1.355
+rate u = 1.013
+rate u = 0.296
+rate eta1 = 0.827
+rate eta1 = 0.940
+rate eta1 = 0.978
+rate eta2 = 1.979
+rate eta2 = 1.995
+rate eta2 = 1.998
+rate eta3 = 0.961
+rate eta3 = 0.988
+rate eta3 = 0.997
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 4, dt = 3.9e-03, u: 9.509e-03, p1: 7.786e-03, p2: 7.786e-03, eta1: 3.162e+00, eta2: 2.958e+00, eta3: 1.195e-01, eta4: 7.447e-02
+N = 8, dt = 3.9e-03, u: 3.629e-03, p1: 3.082e-03, p2: 3.082e-03, eta1: 1.786e+00, eta2: 7.504e-01, eta3: 6.140e-02, eta4: 7.614e-02
+N = 16, dt = 3.9e-03, u: 1.164e-03, p1: 1.136e-03, p2: 1.136e-03, eta1: 9.316e-01, eta2: 1.883e-01, eta3: 3.095e-02, eta4: 7.658e-02
+N = 32, dt = 3.9e-03, u: 5.629e-04, p1: 7.427e-04, p2: 7.427e-04, eta1: 4.730e-01, eta2: 4.713e-02, eta3: 1.551e-02, eta4: 7.668e-02
+rate eta4 = -0.032
+rate eta4 = -0.008
+rate eta4 = -0.002
+rate p2 = 1.337
+rate p2 = 1.440
+rate p2 = 0.613
+rate p1 = 1.337
+rate p1 = 1.440
+rate p1 = 0.613
+rate u = 1.390
+rate u = 1.641
+rate u = 1.048
+rate eta1 = 0.824
+rate eta1 = 0.939
+rate eta1 = 0.978
+rate eta2 = 1.979
+rate eta2 = 1.995
+rate eta2 = 1.998
+rate eta3 = 0.961
+rate eta3 = 0.988
+rate eta3 = 0.997
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 4, dt = 9.8e-04, u: 8.426e-03, p1: 7.599e-03, p2: 7.599e-03, eta1: 3.164e+00, eta2: 2.958e+00, eta3: 2.988e-02, eta4: 1.868e-02
+N = 8, dt = 9.8e-04, u: 3.240e-03, p1: 2.908e-03, p2: 2.908e-03, eta1: 1.788e+00, eta2: 7.505e-01, eta3: 1.535e-02, eta4: 1.911e-02
+N = 16, dt = 9.8e-04, u: 9.245e-04, p1: 8.401e-04, p2: 8.401e-04, eta1: 9.328e-01, eta2: 1.883e-01, eta3: 7.737e-03, eta4: 1.922e-02
+N = 32, dt = 9.8e-04, u: 2.765e-04, p1: 2.813e-04, p2: 2.813e-04, eta1: 4.736e-01, eta2: 4.713e-02, eta3: 3.877e-03, eta4: 1.924e-02
+rate eta4 = -0.032
+rate eta4 = -0.008
+rate eta4 = -0.002
+rate p2 = 1.386
+rate p2 = 1.792
+rate p2 = 1.579
+rate p1 = 1.386
+rate p1 = 1.792
+rate p1 = 1.579
+rate u = 1.379
+rate u = 1.809
+rate u = 1.742
+rate eta1 = 0.823
+rate eta1 = 0.939
+rate eta1 = 0.978
+rate eta2 = 1.979
+rate eta2 = 1.995
+rate eta2 = 1.998
+rate eta3 = 0.961
+rate eta3 = 0.988
+rate eta3 = 0.997
+========= Biomedical experiment =========
+alpha = (0.49, 0.25) nu = 0.4999 E =  1500.0 mu = 500.033335556
+lamb =  2499666.64444 c =  (0.00039, 0.00029) K = (1.57e-05, 0.0375) psi =  (0.0, 0.0)
+============= Space refinement =============
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 4, dt = 5.0e-05, u: 8.125e-02, p1: 5.458e-01, p2: 5.131e-03
+eta1: 1.302e-02, eta2: 1.123e+06, eta3: 1.905e+03, eta4: 3.874e-05
+N = 8, dt = 5.0e-05, u: 4.449e-02, p1: 2.537e-02, p2: 1.652e-03
+eta1: 7.381e-03, eta2: 2.830e+05, eta3: 9.651e+02, eta4: 3.966e-05
+N = 16, dt = 5.0e-05, u: 1.854e-02, p1: 1.303e-02, p2: 4.495e-04
+eta1: 3.855e-03, eta2: 7.143e+04, eta3: 4.841e+02, eta4: 3.995e-05
+N = 32, dt = 5.0e-05, u: 5.563e-03, p1: 1.468e-02, p2: 1.383e-04
+eta1: 1.958e-03, eta2: 1.816e+04, eta3: 2.422e+02, eta4: 4.003e-05
+N = 64, dt = 5.0e-05, u: 1.203e-03, p1: 1.476e-02, p2: 8.532e-05
+eta1: 9.854e-04, eta2: 4.634e+03, eta3: 1.211e+02, eta4: 4.005e-05
+rate eta4 = -0.034
+rate eta4 = -0.011
+rate eta4 = -0.003
+rate eta4 = -0.001
+rate p2 = 1.635
+rate p2 = 1.878
+rate p2 = 1.700
+rate p2 = 0.697
+rate p1 = 4.427
+rate p1 = 0.962
+rate p1 = -0.172
+rate p1 = -0.008
+rate u = 0.869
+rate u = 1.263
+rate u = 1.737
+rate u = 2.209
+============= Time refinement =============
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 2.0e-02, u: 4.602e-05, p1: 1.704e+02, p2: 8.891e-03
+eta1: 3.268e-03, eta2: 3.801e+03, eta3: 2.421e+04, eta4: 8.249e-02
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 1.0e-02, u: 2.300e-05, p1: 8.492e+01, p2: 2.258e-03
+eta1: 3.194e-03, eta2: 3.801e+03, eta3: 1.211e+04, eta4: 2.643e-02
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 5.0e-03, u: 1.149e-05, p1: 4.238e+01, p2: 5.811e-04
+eta1: 3.175e-03, eta2: 3.801e+03, eta3: 6.057e+03, eta4: 1.057e-02
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 2.5e-03, u: 5.746e-06, p1: 2.117e+01, p2: 1.535e-04
+eta1: 3.171e-03, eta2: 3.801e+03, eta3: 3.029e+03, eta4: 4.905e-03
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+Calling FFC just-in-time (JIT) compiler, this may take some time.
+N = 128, dt = 1.3e-03, u: 2.873e-06, p1: 1.058e+01, p2: 4.251e-05
+eta1: 3.169e-03, eta2: 3.801e+03, eta3: 1.514e+03, eta4: 2.404e-03
+rate eta4 = 1.642
+rate eta4 = 1.322
+rate eta4 = 1.108
+rate eta4 = 1.029
+rate p2 = 1.977
+rate p2 = 1.958
+rate p2 = 1.920
+rate p2 = 1.853
+rate p1 = 1.005
+rate p1 = 1.003
+rate p1 = 1.001
+rate p1 = 1.001
+rate u = 1.001
+rate u = 1.001
+rate u = 1.000
+rate u = 1.000

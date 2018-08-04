@@ -1,0 +1,115 @@
+========= Biot, default parameters =========
+alpha = 1.0 nu = None E =  None mu = 0.5
+lamb =  1.0 c =  1.0 K = 1.0
+============= Time refinement =============
+N = 128, dt = 2.0e-02, u: 1.392e-03, p: 4.184e-03
+eta1: 8.375e-02, eta2: 2.947e-03, eta3: 1.961e-02, eta4: 1.923e-01
+N = 128, dt = 1.0e-02, u: 5.838e-04, p: 1.768e-03
+eta1: 8.411e-02, eta2: 2.947e-03, eta3: 9.809e-03, eta4: 9.742e-02
+N = 128, dt = 5.0e-03, u: 2.644e-04, p: 8.026e-04
+eta1: 8.431e-02, eta2: 2.948e-03, eta3: 4.905e-03, eta4: 4.903e-02
+N = 128, dt = 2.5e-03, u: 1.203e-04, p: 3.657e-04
+eta1: 8.441e-02, eta2: 2.948e-03, eta3: 2.453e-03, eta4: 2.466e-02
+N = 128, dt = 1.3e-03, u: 6.079e-05, p: 1.828e-04
+eta1: 8.446e-02, eta2: 2.948e-03, eta3: 1.226e-03, eta4: 1.233e-02
+rate eta4 = 0.981
+rate eta4 = 0.991
+rate eta4 = 0.992
+rate eta4 = 0.999
+rate p = 1.243
+rate p = 1.139
+rate p = 1.134
+rate p = 1.000
+rate u = 1.253
+rate u = 1.143
+rate u = 1.136
+rate u = 0.985
+============= Time/space refinement =============
+N = 4, dt = 6.2e-02, u: 4.759e-03, p: 1.128e-02, eta1: 2.216e+00, eta2: 2.865e+00, eta3: 1.873e+00, eta4: 5.881e-01
+N = 8, dt = 6.2e-02, u: 4.154e-03, p: 1.167e-02, eta1: 1.243e+00, eta2: 7.440e-01, eta3: 9.637e-01, eta4: 5.999e-01
+N = 16, dt = 6.2e-02, u: 3.952e-03, p: 1.177e-02, eta1: 6.465e-01, eta2: 1.878e-01, eta3: 4.858e-01, eta4: 6.029e-01
+N = 32, dt = 6.2e-02, u: 3.912e-03, p: 1.182e-02, eta1: 3.279e-01, eta2: 4.707e-02, eta3: 2.434e-01, eta4: 6.037e-01
+rate eta4 = -0.029
+rate eta4 = -0.007
+rate eta4 = -0.002
+rate p = -0.050
+rate p = -0.012
+rate p = -0.005
+rate u = 0.196
+rate u = 0.072
+rate u = 0.015
+rate eta1 = 0.834
+rate eta1 = 0.943
+rate eta1 = 0.979
+rate eta2 = 1.945
+rate eta2 = 1.986
+rate eta2 = 1.996
+rate eta3 = 0.959
+rate eta3 = 0.988
+rate eta3 = 0.997
+N = 4, dt = 1.6e-02, u: 3.424e-03, p: 6.400e-03, eta1: 2.224e+00, eta2: 2.867e+00, eta3: 4.714e-01, eta4: 1.489e-01
+N = 8, dt = 1.6e-02, u: 1.623e-03, p: 3.462e-03, eta1: 1.257e+00, eta2: 7.446e-01, eta3: 2.425e-01, eta4: 1.523e-01
+N = 16, dt = 1.6e-02, u: 9.457e-04, p: 2.577e-03, eta1: 6.553e-01, eta2: 1.879e-01, eta3: 1.222e-01, eta4: 1.532e-01
+N = 32, dt = 1.6e-02, u: 8.223e-04, p: 2.453e-03, eta1: 3.327e-01, eta2: 4.710e-02, eta3: 6.125e-02, eta4: 1.534e-01
+rate eta4 = -0.033
+rate eta4 = -0.009
+rate eta4 = -0.002
+rate p = 0.887
+rate p = 0.426
+rate p = 0.071
+rate u = 1.077
+rate u = 0.779
+rate u = 0.202
+rate eta1 = 0.824
+rate eta1 = 0.939
+rate eta1 = 0.978
+rate eta2 = 1.945
+rate eta2 = 1.987
+rate eta2 = 1.996
+rate eta3 = 0.959
+rate eta3 = 0.988
+rate eta3 = 0.997
+N = 4, dt = 3.9e-03, u: 3.319e-03, p: 6.096e-03, eta1: 2.230e+00, eta2: 2.868e+00, eta3: 1.179e-01, eta4: 3.730e-02
+N = 8, dt = 3.9e-03, u: 1.325e-03, p: 2.446e-03, eta1: 1.262e+00, eta2: 7.448e-01, eta3: 6.064e-02, eta4: 3.820e-02
+N = 16, dt = 3.9e-03, u: 4.428e-04, p: 9.233e-04, eta1: 6.586e-01, eta2: 1.879e-01, eta3: 3.057e-02, eta4: 3.843e-02
+N = 32, dt = 3.9e-03, u: 2.299e-04, p: 6.210e-04, eta1: 3.344e-01, eta2: 4.711e-02, eta3: 1.532e-02, eta4: 3.849e-02
+rate eta4 = -0.034
+rate eta4 = -0.009
+rate eta4 = -0.002
+rate p = 1.317
+rate p = 1.406
+rate p = 0.572
+rate u = 1.325
+rate u = 1.581
+rate u = 0.945
+rate eta1 = 0.821
+rate eta1 = 0.938
+rate eta1 = 0.978
+rate eta2 = 1.945
+rate eta2 = 1.987
+rate eta2 = 1.996
+rate eta3 = 0.959
+rate eta3 = 0.988
+rate eta3 = 0.997
+N = 4, dt = 9.8e-04, u: 3.305e-03, p: 6.073e-03, eta1: 2.231e+00, eta2: 2.868e+00, eta3: 2.948e-02, eta4: 9.331e-03
+N = 8, dt = 9.8e-04, u: 1.283e-03, p: 2.336e-03, eta1: 1.263e+00, eta2: 7.448e-01, eta3: 1.516e-02, eta4: 9.556e-03
+N = 16, dt = 9.8e-04, u: 3.693e-04, p: 6.800e-04, eta1: 6.594e-01, eta2: 1.879e-01, eta3: 7.643e-03, eta4: 9.616e-03
+N = 32, dt = 9.8e-04, u: 1.132e-04, p: 2.348e-04, eta1: 3.349e-01, eta2: 4.711e-02, eta3: 3.830e-03, eta4: 9.631e-03
+rate eta4 = -0.034
+rate eta4 = -0.009
+rate eta4 = -0.002
+rate p = 1.378
+rate p = 1.781
+rate p = 1.534
+rate u = 1.365
+rate u = 1.797
+rate u = 1.706
+rate eta1 = 0.820
+rate eta1 = 0.938
+rate eta1 = 0.978
+rate eta2 = 1.945
+rate eta2 = 1.987
+rate eta2 = 1.996
+rate eta3 = 0.959
+rate eta3 = 0.988
+rate eta3 = 0.997

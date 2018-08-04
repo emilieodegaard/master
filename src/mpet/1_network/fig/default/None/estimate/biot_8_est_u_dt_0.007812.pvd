@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<VTKFile type="Collection" version="0.1">
+  <Collection>
+    <DataSet timestep="0" part="0" file="biot_8_est_u_dt_0.007812000000.vtu" />
+  </Collection>
+</VTKFile>
