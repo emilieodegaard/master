@@ -1,7 +1,7 @@
 # Overview of files
 
-## mpet
-Contains all code for solving the MPET equations with 1, 2 and 4 networks and compute the a posteriori error estimates.
+## doc
+Contains all tex-files for the thesis.
 
-## poisson
-Contains code to solve the Poisson problem and compute the a posteriori error estimates.
+## src
+Contains all code for the thesis.
