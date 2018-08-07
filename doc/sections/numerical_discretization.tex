@@ -120,16 +120,12 @@ where,
 \begin{align}
 V = \{u \in H^1(\Omega) : u = 0 \,\,\, \textnormal{on} \,\,\, \Gamma_D \}
 \end{align}
-Note that $V$ is also known as $H^1_0(\Omega)$. 
-\\
-\\
 Let $V_h \subset V$ be a finite dimensional subspace of $V$. Then the corresponding discrete variational problem is: find $u_h \in V_h$ such that,
 \begin{equation} \label{eq:poisson_variational}
 \langle \nabla \, u_h, \nabla \, v_h \rangle = \langle f, v_h  \rangle \hspace{0.5cm} \forall v_h \in V_h
 \end{equation}
-
 \section{A priori error estimates} \label{section:a_priori}
-In this section, a priori error estimates for the MPET problem (A=1,2) and the Poisson problem will be derived. The a priori error estimates provide an estimate for the expected convergence rates of the norm of the error. This is necessary since computing the convergence rates will validate our results and ensure that we see what we should according to the mathematical theory. A more detailed explanation of convergence rate is presented in section \ref{section:convergence_rate}. The a priori error estimates for the Biot model has been analyzed in \cite{meunier} and an analysis of the a priori error estimates for the Barenblatt-Biot model can be found in \cite{boal}.
+In this section, a priori error estimates for the MPET problem (A=1,2) and the Poisson problem will be derived. The a priori error estimates provide an estimate for the expected convergence rates of the norm of the error, which is necessary since computing the convergence rates will validate our results and ensure that we see what we should according to the mathematical theory. A more detailed explanation of convergence rate is presented in section \ref{section:convergence_rate}. The a priori error estimates for the Biot model has been analyzed in \cite{meunier} and an analysis of the a priori error estimates for the Barenblatt-Biot model can be found in \cite{boal}.
 \\
 \begin{definition}[\textbf{A priori error estimate (MPET, A=1)}]
 Let $u\in V$ and $p \in Q$ be the solution to \eqref{mpet_disc1}-\eqref{mpet_disc2} with A=1, and let $u_h \in V_h$ and $p_h \in Q_h$ be the solution to \eqref{mpet_fem1}-\eqref{mpet_fem2} with A=1, discretized with Taylor-Hood elements. Then, the following estimate holds,
@@ -152,9 +148,6 @@ Let $u\in V$ be the solution to \eqref{poisson_disc} and let $u_h \in V_h$ be th
 \begin{equation*}
 \|u - u_h\|_{H^1} \leq Ch^2\|u \|_3
 \end{equation*} 
-\begin{equation*}
-\|u - u_h\|_{L^2} \leq Ch\|u \|_2
-\end{equation*}
-for sufficiently smooth solutions. This follows from \eqref{def:approx} with $m=1$ and $t=2$ for $\|u - u_h\|_{H^1}$ and $m=0$ and $t=1$ for $\|u - u_h\|_{L^2}$. The estimate states that the $H^1$-error for $u$ is expected to be of at least third order, wile the $L^2$-error for $u$ is expected to be of at least second order.
+for sufficiently smooth solutions. This follows from \eqref{def:approx} with $m=1$ and $t=2$ for $\|u - u_h\|_{H^1}$ and $m=0$ and $t=1$ for $\|u - u_h\|_{L^2}$. 
 \end{definition}
 

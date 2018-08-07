@@ -85,6 +85,7 @@ Opt. & & 2 & & 2 & & 2
 \end{tabular}
 \captionof{table}{Convergence rate of the a priori and a posteriori error estimates for the Poisson problem discretized with $P_2$ elements} \label{tab:poisson_P2}
 \end{center}
+\mbox{}\\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c|c}
@@ -160,7 +161,7 @@ Opt. & & 3 & & 3 & & 3
 %  \end{subfigure}
 %  \caption{Error magnitude for $\eta$ for the Poisson model discretized with $P_3$ elements} \label{fig:poisson_eta_P3}
 %\end{figure}
-
+\mbox{}\\ \\
 \section{Multiple network poroelasticity model (MPET)} \label{section:num_exp_mpet}
 This section presents the numerical results from the computation of the a posteriori error estimator derived for the MPET model with a single network (Biot), two networks (Barenblatt-Biot) and a four-network poroelasticity model. The results are validated by computing convergence rates and comparing the results with the theoretical predictions. In addition, the error magnitude for each estimator will be displayed to demonstrate where potential mesh refinement should occur. Note that we will not perform any adaptive mesh refinement in this work. 
 \\
@@ -191,6 +192,7 @@ According to the analysis presented in \cite{meunier}, the correct order of conv
 In addition, we observe that the time estimator $\eta_4$ does not decrease as the mesh is refined, but stays constant. This can be explained by the fact that since it is a time estimator, it may exhibit space-independence when the time step is small compared to the spatial refinement parameter. Figure \ref{fig:biot_eta4} displays the error magnitude for the time estimator $\eta_4$ under time refinement. The lighter areas indicate higher error concentration, which indicates a potential for adaptive refinement. %In order to investigate why we observe incorrect rates, space/time-refinement are presented in tables \ref{tab:biot_default_time_space_eta1}, \ref{tab:biot_default_time_space_eta2}, \ref{tab:biot_default_time_space_eta3}, \ref{tab:biot_default_time_space_eta4} for $\eta_1$, $\eta_2$, $\eta_3$ and $\eta_4$, respectively. \todo{explain space/time tables!}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \\
+\\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c}
@@ -204,7 +206,7 @@ Opt. & & 2 & & 2
 \end{tabular}
 \captionof{table}{Error norms and convergence rates for Biot model under space refinement, $T=0.1$, $\tau = 5.0$e-5, $\mu=0.5$, all other parameters set to $1$} \label{tab:biot_default_space_error}
 \end{center}
-
+\mbox{}\\ \\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c|c|c}
@@ -217,7 +219,8 @@ $h^{-1}$ & $\eta_1$ & Rate &  $\eta_2$ & Rate & $\eta_3$ & Rate & $\eta_4$\\\hli
 Opt. & & 2 & & 1 & & 2\footnote[1]{According to \cite{meunier}, the correct order of convergence for $\eta_3$ should be 2.} & 
 \end{tabular}
 \captionof{table}{Convergence rate for a posteriori error estimates for the Biot model under space refinement, $T=0.1$, $\tau = 5.0$e-5, $\mu=0.5$, all other parameters set to $1$} \label{tab:biot_default_space_est}
-\end{center}
+
+\clearpage
 \begin{center}
 \centering
 \begin{tabular}{c|c|c|c|c}
@@ -231,6 +234,8 @@ Opt. & & 1 & & 1
 \end{tabular}
 \captionof{table}{A priori error estimates, a posteriori error estimates and convergence rates for the Biot model under time refinement, $T=1$, $h=1/128$, $\mu=0.5$, all other parameters set to $1$} \label{tab:biot_default_time_error}
 \end{center}
+\end{center}
+\mbox{}\\ \\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c}
@@ -244,6 +249,7 @@ Opt. & & & & & 1
 \end{tabular}
 \captionof{table}{Convergence rate for a posteriori error estimates for the Biot model under time refinement, $T=1$, $h=1/128$, $\mu=0.5$, all other parameters set to $1$} \label{tab:biot_default_time_est}
 \end{center}
+\mbox{}\\ \\
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -265,6 +271,8 @@ Opt. & & & & & 1
   \caption{Error magnitude for $\eta_1$ under space refinement at $t=T$ for single network MPET model} \label{fig:biot_eta1}
 \end{figure}
 
+\clearpage
+
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -285,7 +293,7 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_2$ under space refinement at $t=T$ for single network MPET model} \label{fig:biot_eta2}
 \end{figure}
-
+\mbox{}\\ \\
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -306,7 +314,7 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_3$ under space refinement at $t=T$ for single network MPET model} \label{fig:biot_eta3}
 \end{figure}
-
+\mbox{}\\ \\
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -327,7 +335,7 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_4$ under time refinement at $t=T$ for single network MPET model} \label{fig:biot_eta4}
 \end{figure}
-
+\clearpage
 %\begin{center} 
 %\centering
 %\begin{tabular}{c|c|c|c|c}
@@ -375,6 +383,7 @@ Opt. & & & & & 1
 %\end{tabular}
 %\captionof{table}{Error estimates for $\eta_4$ under space/time refinement, $T=1$, $\mu=0.5$, all other parameters set to $1$}  \label{tab:biot_default_time_space_eta4}
 %\end{center}
+
 \subsection{Two-network poroelasticity} \label{test_bb}
 For the two-network poroelasticity model (Barenblatt-Biot) we use the following manufactured solution,
 \begin{align*}
@@ -398,15 +407,14 @@ The a posteriori error estimators indicate how the error behaves in space and ti
 \\
 \\
 The first experiment is implemented assuming non-interacting fluid networks, with $\mu = 0.5$, $\xi_1 = \xi_2 = 0$ and all other parameters to $1$. The same experiment is then executed with interacting fluid networks. Additionally, an experiment with physiologically inspired parameters is presented.  
-
+\\
 \subsubsection{Two-network poroelasticity: non-interacting fluid networks}
 Table \ref{tab:bb_no_transfer_space_error} present the convergence rates for the a priori error estimate for the displacement and the pressures under space refinement with non-interacting fluid networks. The displacement and the pressure converge optimally as the mesh is refined. We observe that the a posteriori error estimators yields the same rates as for the Biot model, where we see one order lower for $\eta_3$ than what is expected according to \cite{meunier}, see table \ref{tab:bb_no_transfer_space_est}. The quantity $\eta_4$, which is associated with the time error remains constant under space refinement. Figures \ref{fig:bb_no_transfer_eta1}, \ref{fig:bb_no_transfer_eta2} and \ref{fig:bb_no_transfer_eta3} present the error magnitude for the space estimators for the two-network model under space refinement. Similarly, as with the single network model, the magnitude for $\eta_3$ is much smaller than $\eta_1$ indicating further space refinement, and not time refinement. Recall that $\eta_3$ is a space estimator predicting the effect of time on the displacement under space refinement. Thus, when this quantity is much smaller than the space estimator for the displacement suggests adaptive refinement in space. The quantity $\eta_1$ predicts how the spatial error for $u$ will behave, while $\eta_2$ predicts the behavior of the spatial error for the pressures $p_1$ and $p_2$.
 \\
 \\
 Table \ref{tab:bb_no_transfer_time_error} displays the convergence rate for the a priori error estimate for the displacement and the pressures under time refinement with non-interacting fluid networks. The displacement and the pressure exhibit optimal convergence as the time step is refined. Running simulations with smaller time steps ensure convergence of order 1. The time estimator $\eta_4$ converges optimally, see table \ref{tab:bb_no_transfer_time_est}. Figure \ref{fig:bb_no_transfer_eta4} displays the time estimator $\eta_4$ under time refinement. We observe that the overall accuracy of the error increases under time refinement. The lighter areas indicate a higher error, which suggests a potential adaptive refinement to be concentrated here. 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%% bb: default no transfer %%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\\
+\\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c|c}
@@ -420,6 +428,9 @@ Opt. & & 2 & & 2 & & 2
 \end{tabular}
 \captionof{table}{Error norms and convergence rates for Barenblatt-Biot model with non-interacting fluid networks under space refinement, $T=0.1$, $\tau = 5.0$e-5, $\mu=0.5$, $\xi_1 = \xi_2 = 0$, all other parameters set to $1$} \label{tab:bb_no_transfer_space_error}
 \end{center}
+
+\clearpage
+
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c|c|c}
@@ -433,7 +444,7 @@ Opt. & & 2 & & 1  & & 2 &
 \end{tabular}
 \captionof{table}{Convergence rate for a posteriori error estimates for the Barenblatt-Biot model with non-interacting fluid networks under space refinement, $T=0.1$, $\tau = 5.0$e-5, $\mu=0.5$, $\xi_1 = \xi_2 = 0$, all other parameters set to $1$} \label{tab:bb_no_transfer_space_est}
 \end{center}
-\mbox{}\\
+\mbox{}\\ \\ \\
 \begin{center} 
 \centering
 \small
@@ -449,9 +460,7 @@ Opt. & & 1 & & 1  & & 1
 \normalsize
 \captionof{table}{Error estimates and convergence rates for the Barenblatt-Biot model with non-interacting fluid networks under time refinement, $T=1$, $h=1/128$, $\mu=0.5$, $\xi_1 = \xi_2 = 0$, all other parameters set to $1$} \label{tab:bb_no_transfer_time_error}
 \end{center}
-
-\mbox{}\\
-
+\mbox{}\\ \\ \\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c}
@@ -465,8 +474,6 @@ Opt. & & & & & 1
 \end{tabular}
 \captionof{table}{A posteriori error and convergence rates for the Barenblatt-Biot model with non-interacting fluid networks under time refinement, $T=1$, $h=1/128$, $\mu=0.5$, $\xi_1 = \xi_2 = 0$, all other parameters set to $1$} \label{tab:bb_no_transfer_time_est}
 \end{center}
-
-\mbox{}\\
 
 \begin{figure}[h!]
   \centering
@@ -488,7 +495,6 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_1$ under space refinement at $t=T$ for two-network MPET model with non-interacting fluid networks} \label{fig:bb_no_transfer_eta1}
 \end{figure}
-
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -509,7 +515,6 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_2$ under space refinement at $t=T$ for two-network MPET model with non-interacting fluid networks} \label{fig:bb_no_transfer_eta2}
 \end{figure}
-
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -530,7 +535,6 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_3$ under space refinement at $t=T$ for two-network MPET model with non-interacting fluid networks} \label{fig:bb_no_transfer_eta3}
 \end{figure}
-
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -557,6 +561,8 @@ Table \ref{tab:bb_default_transfer_space_error} present the convergence rates fo
 \\
 \\
 Table \ref{tab:bb_default_transfer_time_error} displays the convergence rate for the a priori error estimate for the displacement and the pressures under time refinement with interacting fluid networks.  The displacement and the pressure exhibit optimal convergence as the time step is refined. Running simulations with smaller time steps ensure convergence of order 1. The time estimator $\eta_4$ converges optimally, see table \ref{tab:bb_default_transfer_time_est}. Figure \ref{fig:bb_default_eta4} displays the error magnitude for the time estimator $\eta_4$ which is unchanging from the experiment with non-interacting fluid networks. 
+\\
+\\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c|c}
@@ -570,6 +576,7 @@ Opt. & & 2 & & 2 & & 2
 \end{tabular}
 \captionof{table}{Error norms and convergence rates for two network MPET model with interacting fluid networks under space refinement, $T=0.1$, $\tau = 5.0$e-5, $\mu=0.5$, $\xi_1 = \xi_2 = 1$, all other parameters set to $1$} \label{tab:bb_default_transfer_space_error}
 \end{center}
+\mbox{}\\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c|c|c}
@@ -583,6 +590,9 @@ Opt. & & 2 & & 1  & & 2 &
 \end{tabular}
 \captionof{table}{Convergence rate for a posteriori error estimates for the two network MPET model with interacting fluid networks under space refinement, $T=0.1$, $\tau = 5.0$e-5, $\mu=0.5$, $\xi_1 = \xi_2 = 1$, all other parameters set to $1$} \label{tab:bb_default_transfer_space_est}
 \end{center}
+
+\clearpage
+
 \begin{center} 
 \centering
 \small
@@ -598,6 +608,7 @@ Opt. & & 1 & & 1  & & 1
 \normalsize
 \captionof{table}{Error estimates and convergence rates for the two network MPET model with interacting fluid networks under time refinement, $T=1$, $h=1/64$, $\mu=0.5$, $\xi_1 = \xi_2 = 1$, all other parameters set to $1$} \label{tab:bb_default_transfer_time_error}
 \end{center}
+\mbox{}\\ \\
 \begin{center}
 \centering
 \begin{tabular}{c|c|c|c|c|c}
@@ -611,6 +622,7 @@ Opt. & & & & & 1
 \end{tabular}
 \captionof{table}{A posteriori error and convergence rates for the Barenblatt-Biot model with interacting fluid networks under time refinement, $T=1$, $h=1/64$, $\mu=0.5$, $\xi_1 = \xi_2 = 1$, all other parameters set to $1$}  \label{tab:bb_default_transfer_time_est}
 \end{center}
+\mbox{}\\ \\ \\
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -632,6 +644,8 @@ Opt. & & & & & 1
   \caption{Error magnitude for $\eta_1$ under space refinement at $t=T$ for two-network MPET model with interacting fluid networks} \label{fig:bb_default_eta1}
 \end{figure}
 
+\clearpage
+
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -652,7 +666,7 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_2$ under space refinement at $t=T$ for two-network MPET model with interacting fluid networks} \label{fig:bb_default_eta2}
 \end{figure}
-
+\mbox{}\\ \\
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -673,7 +687,7 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_3$ under space refinement at $t=T$ for two-network MPET model with interacting fluid networks} \label{fig:bb_default_eta3}
 \end{figure}
-
+\mbox{}\\ \\
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -694,7 +708,7 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_4$ under time refinement at $t=T$ for two-network MPET model with interacting fluid networks} \label{fig:bb_default_eta4}
 \end{figure}
-\mbox{} 
+\clearpage
 \subsubsection{Two-network poroelasticity: physiological parameters} \label{section:num_mpet2_bio}
 The main interest in using the MPET model is to simulate interacting biological fluids in a physiological setting. Thus, we perform a numerical experiment with two networks on the unit square with physiologically inspired parameters \cite{lee2018}, presented below in table \ref{tab:bb_parameters}. 
 \begin{center}
@@ -720,6 +734,8 @@ The quantities $\eta_1$ and $\eta_3$ are approximately $10^6$ times larger compa
 \\
 \\
 Table \ref{tab:bb_bio_time_error} displays the convergence rate for the displacement and the pressures under time refinement, which indicates optimal rates for $u$ and $p_1$. The second pressure term $p_2$ exhibit tendencies of superconvergence. That is, it converges at a higher order than expected \cite{ferreira}. The error quantities $\eta_1$ and $\eta_3$ are approximately $10^6$ times larger compared to the non-interactive network experiment under time refinement, see table \ref{tab:bb_bio_time_est}. As we stated above, this is expected since they depend on the size of $\lambda$. We also observe a slightly sub-optimal convergence for $\eta_4$. $\eta_1$ and $\eta_2$ remains constant under time refinement. This is expected as they are associated with the space error. The quantity $\eta_3$ is also associated with the space error; however, it is a time-incremental version of the $\eta_1$, which results in a time-dependence. This quantity converges to 1 under time refinement. Figure  \ref{fig:bb_bio_eta4} presents the error magnitude for the time estimator $\eta_4$ under time refinement, where the lighter areas display where the error is concentrated. 
+\\
+\\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c|c}
@@ -733,6 +749,7 @@ Opt. & & 2 & & 2 & & 2
 \end{tabular}
 \captionof{table}{Error norms and convergence rates for two network MPET model under space refinement, $T=0.1$, $\tau = 5.0$e-5, with physiologically inspired parameters} \label{tab:bb_bio_space_error}
 \end{center}
+\mbox{}\\ \\ \\
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c|c|c}
@@ -746,6 +763,9 @@ Opt. & & 2 & & 1  & & 2 &
 \end{tabular}
 \captionof{table}{Convergence rate for a posteriori error estimates for two network MPET model under space refinement, $T=0.1$, $\tau = 5.0$e-5, with physiologically inspired parameters} \label{tab:bb_bio_space_est}
 \end{center}
+
+\clearpage
+
 \begin{center} 
 \centering
 \small
@@ -761,7 +781,7 @@ Opt. & & 1 & & 1  & & 1
 \normalsize
 \captionof{table}{Error estimates and convergence rates for the two network MPET model with interacting fluid networks under time refinement, $T=1$, $h=1/64$, with physiologically inspired parameters} \label{tab:bb_bio_time_error}
 \end{center}
-\mbox{} \\
+\mbox{} \\ \\ \\ 
 \begin{center} 
 \centering
 \begin{tabular}{c|c|c|c|c|c}
@@ -775,6 +795,7 @@ Opt. & & & & & 1
 \end{tabular}
 \captionof{table}{A posteriori error and convergence rates for the two network MPET model with interacting fluid networks under time refinement, $T=1$, $h=1/64$, with physiologically inspired parameters} \label{tab:bb_bio_time_est}
 \end{center}
+\mbox{}\\ \\ \\ \\
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -795,6 +816,9 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_1$ under space refinement at $t=T$ for two-network MPET model with physiologically inspired parameters} \label{fig:bb_bio_eta1}
 \end{figure}
+
+\clearpage
+
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -815,6 +839,7 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_2$ under space refinement at $t=T$ for two-network MPET model with physiologically inspired parameters} \label{fig:bb_bio_eta2}
 \end{figure}
+\mbox{}\\ \\
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -835,6 +860,7 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_3$ under space refinement at $t=T$ for two-network MPET model with physiologically inspired parameters} \label{fig:bb_bio_eta3}
 \end{figure}
+\mbox{}\\ \\
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.24\textwidth}
@@ -855,8 +881,7 @@ Opt. & & & & & 1
   \end{subfigure}
   \caption{Error magnitude for $\eta_4$ under time refinement at $t=T$ for two-network model with physiologically inspired parameters} \label{fig:bb_bio_eta4}
 \end{figure}
-\newpage
-\newpage
+\clearpage
 
 \subsection{Four-network poroelasticity} \label{test_mpet4}
 As stated in the introduction, the primary motivation in using the MPET equations is to use them to model fluid transportation in the brain. In light of this, it is essential to be able to control the error on complex geometries. Thus, we present the a posteriori error magnitudes for a four-network MPET model on a mouse brain mesh, see figure \ref{fig:brain_mesh}. These experiments as purely meant as a demonstration of how the a posteriori error estimators will work on a geometry different from the unit square. In addition, the experiment implements the a posteriori error estimates derived for the two network poroelasticity model in chapter \ref{chap:error}, however, extended to four networks which demonstrates that the analytic results do not depend on the network number. 
@@ -871,7 +896,7 @@ We consider the entire boundary to be under clamped conditions with Dirichlet da
 \\
 \begin{figure}[h!]
 \centering
-  \includegraphics[width=50mm, scale=0.6]{figures/4_mpet/biomedical/brain_mesh.png}
+  \includegraphics[scale=0.5]{figures/4_mpet/biomedical/brain_mesh.png}
   \caption[Caption for LOF]{Mouse brain mesh\footnotemark{} with 39409 cells }
   \label{fig:brain_mesh}
 \end{figure}

@@ -45,15 +45,8 @@ The following notation will be used throughout this thesis.
                   & \textbf{Function spaces} & \\[3pt]
     $\R$ & Real numbers &  \\[3pt]
     $\N$ & Natural numbers & \\[3pt]
-    $C^0(\Omega)$  & Set of continuous functions & \\[3pt]
-    $C^{\infty}(\Omega)$  & Set of smooth functions & \\[3pt]
-    $C^k(\Omega)$  & Set of functions with continuous derivatives up to order $k$ & \\[3pt]
-    $C^k_0(\Omega)$  & Subset of $C_k$ of functions with compact support &\\[3pt]
     $L^2(\Omega)$ & Space of square-integrable functions &\\[3pt]
-    $L^2_0(\Omega)$  & Subset of $L^2$ of functions with compact support &\\[3pt]
-    $H^m(\Omega)$ & Sobolev space of $L^2$ functions with square-integrable \\
-    $H^m_0(\Omega)$  & Subset of $H^m$ of functions with compact support &\\[3pt]
-    &  derivatives up to order m &\\[3pt]
+    $H^m(\Omega)$ & Sobolev space  \\
     $H^{-1}(\Omega)$  & Dual space of $H^1(\Omega)$ &\\[3pt]
     & \textbf{The finite element method} & \\[3pt]
     $\langle \cdot, \cdot \rangle$  & $L^2$-inner product over $\Omega$ &\\[3pt]
@@ -62,10 +55,7 @@ The following notation will be used throughout this thesis.
     $\mathcal{P}_q(T)$ &  Space of polynomials of total
                        degree $\leq q$ over T &\\[3pt]
     $P_q$   & Lagrange element of degree $q$ &\\[3pt]
-\end{tabular}
-\newpage
-\begin{tabular}{lll}
-    & \textbf{Finite element partition} & \\[3pt]
+    		& \textbf{Finite element partition} & \\[3pt]
     $\mathcal{T}_h$   & Partition of $\Omega$ &\\[3pt]
     $h$   & Maximum diameter of the elements in $\mathcal{T}_h$ &\\[3pt]
     $T$   & Element in $\mathcal{T}_h$ &\\[3pt]
@@ -73,10 +63,13 @@ The following notation will be used throughout this thesis.
     $\mathcal{E}_T$   & Faces of $T$ &\\[3pt]
     $\mathcal{E}_\Omega$   & Faces having at least one endpoint in the interior of $\Omega$ &\\[3pt]
     $\mathcal{E}_{\partial\Omega}$   & Faces contained in the boundary &\\[3pt]
-     $\mathcal{E}_{\partial\Omega_D}$   & Faces contained in the Dirichlet boundary &\\[3pt]
+    $\mathcal{E}_{\partial\Omega_D}$   & Faces contained in the Dirichlet boundary &\\[3pt]
+ \end{tabular}
+\newpage
+\begin{tabular}{lll}
     $\omega_T$   & Elements sharing a face with $T$ &\\[3pt]
     $\tilde{\omega}_T$  & Elements sharing a vertex with $T$ &\\[3pt]
-    $\omega_E$   & Elements sharing adjacent to $E$ &\\[3pt]
+    $\omega_E$   & Elements sharing face adjacent to $E$ &\\[3pt]
     $\tilde{\omega}_E$  & Elements sharing a vertex with $E$ &\\[3pt]
 	$\psi_T$  & Element bubble function &\\[3pt]
 	$\psi_E$  & Face bubble function &\\[3pt]
@@ -195,7 +188,7 @@ For every element $T \in \mathcal{T}$ the \textit{element bubble function} $\psi
 \psi_T(x) =  0 \quad & \, \forall x \notin T \\
 \max_{x \in T} \psi_T(x) = 1 
 \end{align*}
-The following inverse estimates holds for all polynomials $\phi \subset \mathbb{P}^k$,
+The following inverse estimates holds for all polynomials $\phi \subset \mathcal{P}_k$,
 \begin{align*}
 c_{I1,k}\|\phi \|_T \leq & \, \|\psi_T^{\frac{1}{2}}\phi\|_T \\
 \|\nabla(\psi_T\phi) \|_T \leq & \, c_{I2,k}H_T^{-1}\|\phi\|_T
@@ -209,7 +202,7 @@ For every face $E \in \mathcal{E}$ the \textit{face bubble function } $\psi_E$ f
 \psi_E(x) = 0 \quad  & \, \forall x \notin \omega_E \\
 \max_{x \in \omega_E} \psi_E(x) = 1 
 \end{align*}
-The inverse estimates holds for all polynomials $\phi \subset \mathbb{P}^k$,
+The inverse estimates holds for all polynomials $\phi \subset \mathcal{P}_k$,
 \begin{align*}
 c_{I3,k}\|\phi \|_E \leq & \, \|\psi_E^{\frac{1}{2}}\phi\|_E \\
 \|\nabla(\psi_E\phi) \|_{\omega_E} \leq & \, c_{I4,k}H_E^{-\frac{1}{2}}\|\phi\|_E \\
@@ -226,7 +219,7 @@ For each edge $E \in \mathcal{E}$, the jump across $E$ in the direction $\mathbf
 \end{definition}
 
 \begin{theorem}[\textbf{Trace inequalities}]\label{def:trace}
-For every element $T$ with face or edge $E$ and all $u \in \mathbb{P}^k$ the following holds,
+For every element $T$ with face or edge $E$ and all $u \in \mathcal{P}_k$ the following holds,
 \begin{align*}
 \|u\|_{L^2(E)} \leq c_{T1} h_T^{-\frac{1}{2}}\|u\|_{L^2(T)} \quad \forall u \in E \subset \partial T \\
 \|\nabla u \cdot \mathbf{n}\|_{L^2(E)} \leq c_{T2} h_T^{-\frac{1}{2}}\|\nabla u\|_{L^2(T)} \quad \forall u \in E \subset \partial T
