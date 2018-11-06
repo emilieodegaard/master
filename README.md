@@ -1,7 +1,2 @@
-# Overview of folders
-
-## doc
-Contains all tex-files.
-
-## src
-Contains all code.
+# master
+All documentation for my master's thesis ('2018).
