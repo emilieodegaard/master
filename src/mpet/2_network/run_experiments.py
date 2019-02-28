@@ -263,7 +263,8 @@ if __name__ == "__main__":
 	    except Exception as e:
 	        print(e)
 
-	run_default(transfer=False)
-	run_default(transfer=True)
-	run_biomedical()
+	# Run numerical experiments 
+	run_default(transfer=False) # All params set to 1 without any transfer term
+	run_default(transfer=True)  # All params set to 1 with  transfer term
+	run_biomedical()			# Physiologically relevant parameters
 
