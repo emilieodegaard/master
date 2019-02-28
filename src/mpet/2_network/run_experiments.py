@@ -214,7 +214,7 @@ def run_biomedical():
 	print("alpha =", alpha, "nu =", nu, "E = ", E, "mu =", mu)
 	print("lamb = ", lamb, "c = ",  c, "K =", K, "xi = ", xi)
 
-	#run(params, experiment="biomed", refinement="space")
+	run(params, experiment="biomed", refinement="space")
 	run(params, experiment="biomed", refinement="time")
 
 def run_default(transfer=True):
@@ -245,9 +245,9 @@ def run_default(transfer=True):
 	print("alpha =", alpha, "nu =", nu, "E = ", E, "mu =", mu)
 	print("lamb = ", lamb, "c = ",  c, "K =", K, "xi = ", xi)
 
-	#run(params, experiment, refinement="space")
+	run(params, experiment, refinement="space")
 	run(params, experiment, refinement="time")
-	#run(params, experiment, refinement=None)
+	run(params, experiment, refinement=None)
 
 
 if __name__ == "__main__":

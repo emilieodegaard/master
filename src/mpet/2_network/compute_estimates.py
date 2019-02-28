@@ -4,7 +4,6 @@ import os
 import matplotlib.pyplot as plt
 import get_source_terms as st
 
-
 # Turn on FEniCS optimizations
 parameters["form_compiler"]["cpp_optimize"] = True
 flags = ["-O3", "-ffast-math", "-march=native"]
