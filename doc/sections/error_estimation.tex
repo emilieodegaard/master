@@ -861,9 +861,9 @@ Next, we define the residuals where every $v \in V$ and $q_1, q_2 \in Q$ satisfi
 \subsubsection{Element and edge residuals}
 In the above framework, we define the element residual and edge residuals for $R_u$ and $R_{p_a}$, $a=1,2$. Let $R_{u,T}$ and $R_{p_a,T}$ denote the element residuals of $R_u$ and $R_{p_a}$, respectively. Also let $R_{u,E}$ and $R_{p_a,E}$ denote the respective edge residuals of $R_u$ and $R_{p_a}$, $a=1,2$. We then have for all $m\in\{0,...,N\}$,
 \begin{align} \label{bb_u_element_edge_res}
-R_{u,T}(u^m_h,p^m_h) = & \, f_h^m + \nabla \cdot \sigma^{\ast}(u_h^m) + \sum{a=1}^2 -\alpha_a \nabla p_{ah}^m  \quad  T \in \mathcal{T}_h\\ 
+R_{u,T}(u^m_h,p^m_h) = & \, f_h^m + \nabla \cdot \sigma^{\ast}(u_h^m) + \sum_{a=1}^2 -\alpha_a \nabla p_{ah}^m  \quad  T \in \mathcal{T}_h\\ 
 R_{u,E}(u^m_h,p^m_h)  = & \, \begin{cases} 
-	\sum{a=1}^2 \alpha_a \, \mathbb{J}_E(\mathbf{n}_E \cdot p_{ah}^m) - \mathbb{J}_E(\mathbf{n}_E \cdot \sigma^{\ast}(u_h^m)) & \,  E \in \mathcal{E}_\Omega \\
+	\sum_{a=1}^2 \alpha_a \, \mathbb{J}_E(\mathbf{n}_E \cdot p_{ah}^m) - \mathbb{J}_E(\mathbf{n}_E \cdot \sigma^{\ast}(u_h^m)) & \,  E \in \mathcal{E}_\Omega \\
      0 & \, E \in \mathcal{E}_{\Gamma_D} \\
 \end{cases}
 \end{align} 
